@@ -1,14 +1,25 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Compilers
 {
 	public class Scanner
 	{
+	
+		//constructor
+		static Scanner()
+		{
+
+
+		}
+
+
 		//dispatcher method destroys whitespace and sends strings to the scanner
 		public static string Dispatcher (string x)
 		{
+
 			//a string and StringBuilder to build the output token string
 			string tokens;
 			StringBuilder tokenizer = new StringBuilder ();
@@ -66,6 +77,34 @@ namespace Compilers
 			string process;
 			StringBuilder build = new StringBuilder ();
 
+			Dictionary<string, string> reserved = new Dictionary<string, string>();
+			reserved.Add("and", "MP_AND ");
+			reserved.Add("begin", "MP_BEGIN ");
+			reserved.Add("div", "MP_DIV ");
+			reserved.Add("do", "MP_DO ");
+			reserved.Add("downto", "MP_DOWNTO ");
+			reserved.Add("else", "MP_ELSE ");
+			reserved.Add("end", "MP_END ");
+			reserved.Add("fixed", "MP_FIXED ");
+			reserved.Add("float", "MP_FLOAT ");
+			reserved.Add("for", "MP_FOR ");
+			reserved.Add("function", "MP_FUNCTION ");
+			reserved.Add("if", "MP_IF ");
+			reserved.Add("integer", "MP_INTEGER ");
+			reserved.Add("mod", "MP_MOD ");
+			reserved.Add("not", "MP_NOT ");
+			reserved.Add("or", "MP_OR ");
+			reserved.Add("proceedure", "MP_PROCEEDURE ");
+			reserved.Add("program", "MP_PROGRAM ");
+			reserved.Add("read", "MP_READ ");
+			reserved.Add("repeat", "MP_REPEAT ");
+			reserved.Add("then", "MP_THEN ");
+			reserved.Add("to", "MP_TO ");
+			reserved.Add("until", "MP_UNTIL ");
+			reserved.Add("var", "MP_VAR ");
+			reserved.Add("while", "MP_WHILE ");
+			reserved.Add("write", "MP_WRITE ");
+
 			//read the input string with StringReader
 			using (StringReader check = new StringReader (y)) {
 				//IMPORTANT!
@@ -80,7 +119,8 @@ namespace Compilers
 					//check if first char is A-Z,a-z, or _
 					//if it is, it's an identifier
 					if((comp >= 65 && comp <= 90)||(comp >= 97 && comp <= 122)||(comp == 95)){
-
+						StringBuilder id_build = new StringBuilder ();
+						id_build.Append ((char)comp);
 						//grab the rest of the identifier in while loop
 						bool is_id = true;
 						while (is_id) {
@@ -88,10 +128,20 @@ namespace Compilers
 							int comp2 = check.Peek ();
 							if ((comp2 >= 65 && comp2 <= 90) || (comp2 >= 97 && comp2 <= 122) || (comp2 == 95) || (comp2 >= 48 && comp <= 57)) {
 								//consume the next char
-								int junk = check.Read ();
+								id_build.Append( (char)check.Read ());
 							} else {
-								//reached the end of the id, return id token and exit the loop
-								build.Append ("MP_IDENTIFIER ");
+
+								//check if the id is a reserved word
+								string res_check = id_build.ToString ();
+								try{
+									string res = reserved[res_check];
+									build.Append(res);
+								}catch(KeyNotFoundException){
+									//reached the end of the id, return id token and exit the loop
+									build.Append ("MP_IDENTIFIER ");
+								}
+
+
 								is_id = false;
 							}
 						}
@@ -155,6 +205,7 @@ namespace Compilers
 										is_num = false;
 									}
 								}
+								//check if the E is followed by a digit
 								else if (err_spot >= 48 && err_spot <= 57) {
 
 								} else {
@@ -202,12 +253,6 @@ namespace Compilers
 		}
 
 
-		//method to check if an identifier is a reserved word
-		public static string reserved_word(string y){
-			string process = " ";
-
-			return process;
-		}
 	}
 
 
