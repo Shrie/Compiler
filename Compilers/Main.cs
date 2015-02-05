@@ -8,7 +8,7 @@ namespace Compilers
 		public static void Main (string[] args)
 		{
 			string contents = File.ReadAllText(@"c:\users\Hunter\Desktop\compilers\test1.txt");
-			Scanner.ScannerReader (contents);
+			Dispatcher.Reader (contents);
 		}
 	}
 }
