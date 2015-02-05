@@ -78,32 +78,32 @@ namespace Compilers
 			StringBuilder build = new StringBuilder ();
 
 			Dictionary<string, string> reserved = new Dictionary<string, string>();
-			reserved.Add("and", "MP_AND ");
-			reserved.Add("begin", "MP_BEGIN ");
-			reserved.Add("div", "MP_DIV ");
-			reserved.Add("do", "MP_DO ");
-			reserved.Add("downto", "MP_DOWNTO ");
-			reserved.Add("else", "MP_ELSE ");
-			reserved.Add("end", "MP_END ");
-			reserved.Add("fixed", "MP_FIXED ");
-			reserved.Add("float", "MP_FLOAT ");
-			reserved.Add("for", "MP_FOR ");
-			reserved.Add("function", "MP_FUNCTION ");
-			reserved.Add("if", "MP_IF ");
-			reserved.Add("integer", "MP_INTEGER ");
-			reserved.Add("mod", "MP_MOD ");
-			reserved.Add("not", "MP_NOT ");
-			reserved.Add("or", "MP_OR ");
-			reserved.Add("proceedure", "MP_PROCEEDURE ");
-			reserved.Add("program", "MP_PROGRAM ");
-			reserved.Add("read", "MP_READ ");
-			reserved.Add("repeat", "MP_REPEAT ");
-			reserved.Add("then", "MP_THEN ");
-			reserved.Add("to", "MP_TO ");
-			reserved.Add("until", "MP_UNTIL ");
-			reserved.Add("var", "MP_VAR ");
-			reserved.Add("while", "MP_WHILE ");
-			reserved.Add("write", "MP_WRITE ");
+			reserved.Add("and", "MP_AND \n");
+			reserved.Add("begin", "MP_BEGIN \n");
+			reserved.Add("div", "MP_DIV \n");
+			reserved.Add("do", "MP_DO \n");
+			reserved.Add("downto", "MP_DOWNTO \n");
+			reserved.Add("else", "MP_ELSE \n");
+			reserved.Add("end", "MP_END \n");
+			reserved.Add("fixed", "MP_FIXED \n");
+			reserved.Add("float", "MP_FLOAT \n");
+			reserved.Add("for", "MP_FOR \n");
+			reserved.Add("function", "MP_FUNCTION \n");
+			reserved.Add("if", "MP_IF \n");
+			reserved.Add("integer", "MP_INTEGER \n");
+			reserved.Add("mod", "MP_MOD \n");
+			reserved.Add("not", "MP_NOT \n");
+			reserved.Add("or", "MP_OR \n");
+			reserved.Add("proceedure", "MP_PROCEEDURE \n");
+			reserved.Add("program", "MP_PROGRAM \n");
+			reserved.Add("read", "MP_READ \n");
+			reserved.Add("repeat", "MP_REPEAT \n");
+			reserved.Add("then", "MP_THEN \n");
+			reserved.Add("to", "MP_TO \n");
+			reserved.Add("until", "MP_UNTIL \n");
+			reserved.Add("var", "MP_VAR \n");
+			reserved.Add("while", "MP_WHILE \n");
+			reserved.Add("write", "MP_WRITE \n");
 
 			//read the input string with StringReader
 			using (StringReader check = new StringReader (y)) {
@@ -138,7 +138,7 @@ namespace Compilers
 									build.Append(res);
 								}catch(KeyNotFoundException){
 									//reached the end of the id, return id token and exit the loop
-									build.Append ("MP_IDENTIFIER ");
+									build.Append ("MP_IDENTIFIER \n");
 								}
 
 
@@ -165,7 +165,7 @@ namespace Compilers
 							//if it's a decimal point it could be a fixed or float
 							else if(comp2 == 46) {
 								if (is_fixed) {
-									build.Append ("MP_ERROR ");
+									build.Append ("MP_ERROR \n");
 									is_num = false;
 								} else {
 									is_fixed = true;
@@ -178,14 +178,14 @@ namespace Compilers
 								if (err_spot >= 48 && err_spot <= 57) {
 
 								} else {
-									build.Append ("MP_ERROR ");
+									build.Append ("MP_ERROR \n");
 									is_num = false;
 								}
 							}
 							//if it's an e or E, then it's a float
 							else if(comp2 == 69 || comp2 == 101){
 								if (is_float) {
-									build.Append ("MP_ERROR ");
+									build.Append ("MP_ERROR \n");
 									is_num = false;
 								} else {
 									is_float = true;
@@ -201,7 +201,7 @@ namespace Compilers
 									if (err_spot2 >= 48 && err_spot2 <= 57) {
 
 									} else {
-										build.Append ("MP_ERROR ");
+										build.Append ("MP_ERROR \n");
 										is_num = false;
 									}
 								}
@@ -209,7 +209,7 @@ namespace Compilers
 								else if (err_spot >= 48 && err_spot <= 57) {
 
 								} else {
-									build.Append ("MP_ERROR ");
+									build.Append ("MP_ERROR \n");
 									is_num = false;
 								}
 							}
@@ -218,11 +218,11 @@ namespace Compilers
 								//number it is based on the flags
 
 								if (is_float) {
-									build.Append ("MP_FLOAT_LIT ");
+									build.Append ("MP_FLOAT_LIT \n");
 								} else if (is_fixed) {
-									build.Append ("MP_FIXED_LIT ");
+									build.Append ("MP_FIXED_LIT \n");
 								} else {
-									build.Append ("MP_INTEGER_LIT ");
+									build.Append ("MP_INTEGER_LIT \n");
 								}
 
 								is_num = false;
@@ -237,7 +237,7 @@ namespace Compilers
 					}
 					else{
 						//character unrecognized, append error to string
-						build.Append ("MP_ERROR ");
+						build.Append ("MP_ERROR \n");
 					}
 
 					white_space = Char.IsWhiteSpace ((char)check.Peek ());
