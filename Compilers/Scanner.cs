@@ -48,9 +48,9 @@ namespace Compilers
 					{
 						StringBuilder str = new StringBuilder ();
 						bool white_space = false;
-						while (white_space) 
+						while (!white_space) 
 						{
-							Console.Write ();
+							Console.Write ((char)win.Peek());
 							str.Append ((char)win.Read());
 							white_space = Char.IsWhiteSpace ((char)win.Peek ());
 						}
