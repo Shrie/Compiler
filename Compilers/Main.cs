@@ -7,8 +7,9 @@ namespace Compilers
 	{
 		public static void Main (string[] args)
 		{
-			string contents = File.ReadAllText(@"c:\users\Hunter\Desktop\compilers\test1.txt");
-			Dispatcher.Reader (contents);
+			string contents = File.ReadAllText(@"c:\users\Austo89\Desktop\compilers\test1.txt");
+			string output = Dispatcher.Reader (contents);
+			Console.Write(output);
 		}
 	}
 }

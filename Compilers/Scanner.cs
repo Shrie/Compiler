@@ -1,16 +1,18 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 
 namespace Compilers
 {
 	public class Dispatcher
 	{
-		public static void Reader (string x)
+		public static string Reader (string x)
 		{
+			string tokens;
+			StringBuilder tokenizer = new StringBuilder ();
 			//Console.WriteLine (x); //for testing
 			//Console.WriteLine (x.Length);
-			for (int i = 0; i < x.Length; i++)
-			{
-				/* Sudo code
+			/* Sudo code
 				 * 
 				 * scan_next_char
 				 * 
@@ -26,13 +28,46 @@ namespace Compilers
 				 * 			i++
 				 * 		}
 				 * }
-				 * if(y.lenth != 0)
+				 * if(y.length != 0)
 				 * {
 				 * 		Scanner(String y)
 				 * }
 				 */
+			using (StringReader win = new StringReader (x)) 
+			{
+
+				while (win.Peek() != -1)
+				{
+					if (Char.IsWhiteSpace((char)win.Peek())) 
+					{
+						char junk = (char)win.Read();
+
+
+					} 
+					else 
+					{
+						StringBuilder str = new StringBuilder ();
+						bool white_space = false;
+						while (white_space) 
+						{
+							Console.Write ();
+							str.Append ((char)win.Read());
+							white_space = Char.IsWhiteSpace ((char)win.Peek ());
+						}
+
+						string scan_it = str.ToString ();
+						tokenizer.Append (scan_it);
+
+					}
+				}
 			}
+			tokens = tokenizer.ToString ();
+			return tokens;
 		}
 	}
+
+
+
+
 }
 
