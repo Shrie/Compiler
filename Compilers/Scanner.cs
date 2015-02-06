@@ -274,7 +274,34 @@ namespace Compilers
 							build.Append ("MP_PLUS \n");
 						} else if (comp == 45) {
 							build.Append ("MP_MINUS \n");
-						} else if (comp == 42) {
+						} else if(comp == 39){
+
+
+							bool eos = false;
+							while (!eos) {
+								int comp2 = check.Peek ();
+								if (comp2 == 39) {
+									int junk = check.Read ();
+									int comp3 = check.Peek ();
+									if (comp3 == 39) {
+										int junk2 = check.Read ();
+									} else {
+										int junk2 = check.Read ();
+										build.Append ("MP_STRING_LIT \n");
+										eos = true;
+									}
+								} else if (comp2 == 133 || comp2 == 13 || comp2 == -1) {
+									build.Append ("MP_ERROR \n");
+									eos = true;
+								} else {
+									int junk = check.Read ();
+								}
+
+							}
+
+						}
+						
+						else if (comp == 42) {
 							build.Append ("MP_TIMES \n");
 						} else if (comp == 123) {
 							int rparen = check.Peek ();
@@ -294,6 +321,21 @@ namespace Compilers
 
 
 
+					//check for apostrophe
+					//apostrophe starts a string literal
+					else if(comp == 39){
+
+						bool eos = false;
+						while (!eos) {
+
+
+
+						}
+
+					}
+					else if(false){
+						//OTHER SCANNERS GO HERE
+					}
 					else{
 						Console.Write (comp);
 						//character unrecognized, append error to string
