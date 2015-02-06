@@ -230,12 +230,72 @@ namespace Compilers
 						}
 
 					}
-					else if(false){
+					else 
+						if (comp == 46) {
+							build.Append ("MP_PERIOD \n");
+						} else if (comp == 44) {
+							build.Append ("MP_COMMA \n");
+						} else if (comp == 59) {
+							build.Append ("MP_SCOLON \n");
+						} else if (comp == 40) {
+							build.Append ("MP_LPAREN \n");
+						} else if (comp == 41) {
+							build.Append ("MP_RPAREN \n");
+						} else if (comp == 61) {
+							build.Append ("MP_EQUAL \n");
+						} else if (comp == 62) {
+							int i62 = check.Peek ();
+							if (i62 == 61) {
+								int junk = check.Read ();
+								build.Append ("MP_GEQUAL \n");
+							} else {
+								build.Append ("MP_GTHAN \n");
+							} 
+						} else if (comp == 60) {
+							int i60 = check.Peek ();
+							if (i60 == 61) {
+								int junk = check.Read ();
+								build.Append ("MP_LEQUAL \n");
+							} else if (i60 == 62) {
+								int junk = check.Read ();
+								build.Append ("NEQUAL \n");
+							} else {
+								build.Append ("MP_LTHAN \n");
+							} 
+						} else if (comp == 58) {
+							int i58 = check.Peek ();
+							if (i58 == 61) {
+								int junk = check.Read ();
+								build.Append ("MP_ASSIGN \n");
+							} else {
+								build.Append ("MP_COLON \n");
+							}
+						} else if (comp == 43) {
+							build.Append ("MP_PLUS \n");
+						} else if (comp == 45) {
+							build.Append ("MP_MINUS \n");
+						} else if (comp == 42) {
+							build.Append ("MP_TIMES \n");
+						} else if (comp == 123) {
+							int rparen = check.Peek ();
+							char whitey = (char)rparen;
+							bool exit = false;
+							while (exit == false) {
+								int junk = check.Read ();
+								rparen = check.Peek ();
+								if (rparen == 125) 
+									exit = true;
 
-						//OTHER SCANNERS GO HERE
+							}
+							//int junk2 = check.Read();
+							build.Append ("MP_COMMENT \n");
+						}
 
-					}
+
+
+
 					else{
+						Console.Write (comp);
 						//character unrecognized, append error to string
 						build.Append ("MP_ERROR \n");
 					}
