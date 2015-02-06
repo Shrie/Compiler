@@ -32,31 +32,35 @@ namespace Compilers
 					//chomp whitespace until next no empty char
 					if (Char.IsWhiteSpace ((char)win.Peek ())) {
 						char junk = (char)win.Read ();
-					} 
-					else if (win.Peek() == 123) {
+					} else if (win.Peek () == 123) {
 						int junk3 = win.Read ();
 						bool eoc = false;
+						bool err_flag = false;
 						while (!eoc) {
 							int comp2 = win.Peek ();
 							if (comp2 == 125) {
 								int junk = win.Read ();
 								eoc = true;
-							} 
-							else if(Char.IsWhiteSpace((char)comp2)){
-								int junk2 = win.Read ();
+							} else if (comp2 == -1) {
 
-							}else {
+								tokenizer.Append ("MP_RUN_COMMENT \n");
+								eoc = true;
+								err_flag = true;
+							} else if (Char.IsWhiteSpace ((char)comp2)) {
+								int junk2 = win.Read ();
+							} else {
 								int junk = win.Read ();
 							}
 
 						}
 						//int junk2 = check.Read();
-						tokenizer.Append ("MP_COMMENT \n");
-					}
-
-					else if (win.Peek() == 39) {
+						if (!err_flag) {
+							tokenizer.Append ("MP_COMMENT \n");
+						}
+					} else if (win.Peek () == 39) {
 						int junk3 = win.Read ();
 
+						bool run_flag = false;
 						bool eoc = false;
 						while (!eoc) {
 							//int junk3 = win.Read ();
@@ -64,16 +68,22 @@ namespace Compilers
 							if (comp2 == 39) {
 								int junk = win.Read ();
 								eoc = true;
-							} 
-							else if(Char.IsWhiteSpace((char)comp2)||comp2 == -1){
+							} else if (comp2 == 13 || comp2 == 133) {
+
+								tokenizer.Append ("MP_STRING_RUN \n");
+								eoc = true;
+								run_flag = true;
+							} else if (Char.IsWhiteSpace ((char)comp2) || comp2 == -1) {
 								int junk2 = win.Read ();
-							}else {
+							} else {
 								int junk = win.Read ();
 							}
 
 						}
 						//int junk2 = check.Read();
-						tokenizer.Append ("MP_STRING_LIT \n");
+						if (!run_flag) {
+							tokenizer.Append ("MP_STRING_LIT \n");
+						}
 					}
 					//when a char is found, build a string to feed to a scanner
 					else {
@@ -307,8 +317,6 @@ namespace Compilers
 						}
 					} else if (comp == 43) {
 						build.Append ("MP_PLUS \n");
-					} else if (comp == 47){
-						build.Append ("MP_FLOAT_DIVIDE \n");
 					} else if (comp == 45) {
 						build.Append ("MP_MINUS \n");
 					} else if (comp == 39) {
@@ -345,11 +353,10 @@ namespace Compilers
 							if (comp2 == 125) {
 								int junk = check.Read ();
 								eoc = true;
-							} 
-							else if(Char.IsWhiteSpace((char)comp2)||comp2 == -1){
+							} else if (Char.IsWhiteSpace ((char)comp2) || comp2 == -1) {
 								int junk2 = check.Read ();
 								Console.Write ("no");
-						}else {
+							} else {
 								int junk = check.Read ();
 							}
 
