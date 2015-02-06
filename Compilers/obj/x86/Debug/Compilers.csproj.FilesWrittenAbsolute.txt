@@ -1,0 +1,5 @@
+/home/doctor-dubs/Documents/compilers/Compiler/Compilers/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/home/doctor-dubs/Documents/compilers/Compiler/Compilers/bin/Debug/Compilers.exe.mdb
+/home/doctor-dubs/Documents/compilers/Compiler/Compilers/bin/Debug/Compilers.exe
+/home/doctor-dubs/Documents/compilers/Compiler/Compilers/obj/x86/Debug/Compilers.exe
+/home/doctor-dubs/Documents/compilers/Compiler/Compilers/obj/x86/Debug/Compilers.exe.mdb
