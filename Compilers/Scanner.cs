@@ -68,7 +68,7 @@ namespace Compilers
 							if (comp2 == 39) {
 								int junk = win.Read ();
 								eoc = true;
-							} else if (comp2 == 13 || comp2 == 133) {
+							} else if (comp2 == 13 || comp2 == 133 || comp2 == -1) {
 
 								tokenizer.Append ("MP_STRING_RUN \n");
 								eoc = true;
