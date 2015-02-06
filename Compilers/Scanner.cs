@@ -317,7 +317,9 @@ namespace Compilers
 						}
 					} else if (comp == 43) {
 						build.Append ("MP_PLUS \n");
-					} else if (comp == 45) {
+					} else if(comp == 47){ 
+						build.Append ("MP_FLOAT_DIVIDE \n");
+				}else if (comp == 45) {
 						build.Append ("MP_MINUS \n");
 					} else if (comp == 39) {
 
