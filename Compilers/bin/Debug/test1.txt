@@ -1,0 +1,1 @@
+and begin Boolean div do downto else and false fixed float for function if integer mod not or procedure program read repeat string to type until var while write writeln sampleIdentifier 1337 2.5 0.314159e1 := : , = / >= > <= < ( ) - <> . + ; * {commentWithNoWhitespace} {comment with white space} {} { } 'stringWithNoWhitespace' 'String with whitespace' ' ' '' 
