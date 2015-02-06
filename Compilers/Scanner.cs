@@ -55,11 +55,11 @@ namespace Compilers
 					}
 
 					else if (win.Peek() == 39) {
-
+						int junk3 = win.Read ();
 
 						bool eoc = false;
 						while (!eoc) {
-							int junk3 = win.Read ();
+							//int junk3 = win.Read ();
 							int comp2 = win.Peek ();
 							if (comp2 == 39) {
 								int junk = win.Read ();
