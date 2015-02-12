@@ -126,32 +126,36 @@ namespace Compilers
 			StringBuilder build = new StringBuilder ();
 
 			Dictionary<string, string> reserved = new Dictionary<string, string> ();
-			reserved.Add ("and", "MP_AND \n");
-			reserved.Add ("begin", "MP_BEGIN \n");
-			reserved.Add ("div", "MP_DIV \n");
-			reserved.Add ("do", "MP_DO \n");
-			reserved.Add ("downto", "MP_DOWNTO \n");
-			reserved.Add ("else", "MP_ELSE \n");
-			reserved.Add ("end", "MP_END \n");
-			reserved.Add ("fixed", "MP_FIXED \n");
-			reserved.Add ("float", "MP_FLOAT \n");
-			reserved.Add ("for", "MP_FOR \n");
-			reserved.Add ("function", "MP_FUNCTION \n");
-			reserved.Add ("if", "MP_IF \n");
-			reserved.Add ("integer", "MP_INTEGER \n");
-			reserved.Add ("mod", "MP_MOD \n");
-			reserved.Add ("not", "MP_NOT \n");
-			reserved.Add ("or", "MP_OR \n");
-			reserved.Add ("proceedure", "MP_PROCEEDURE \n");
-			reserved.Add ("program", "MP_PROGRAM \n");
-			reserved.Add ("read", "MP_READ \n");
-			reserved.Add ("repeat", "MP_REPEAT \n");
-			reserved.Add ("then", "MP_THEN \n");
-			reserved.Add ("to", "MP_TO \n");
-			reserved.Add ("until", "MP_UNTIL \n");
-			reserved.Add ("var", "MP_VAR \n");
-			reserved.Add ("while", "MP_WHILE \n");
-			reserved.Add ("write", "MP_WRITE \n");
+			reserved.Add ("and", String.Format("{0,-16}{1,-20}{2,0}","MP_AND", "and", "\n"));
+			reserved.Add ("begin", String.Format("{0,-16}{1,-20}{2,0}","MP_BEGIN", "begin", "\n"));
+			reserved.Add ("Boolean", String.Format ("{0,-16}{1,-20}{2,0}", "MP_BOOLEAN", "Boolea", "\n"));
+			reserved.Add ("div", String.Format("{0,-16}{1,-20}{2,0}","MP_DIV", "div", "\n"));
+			reserved.Add ("do", String.Format("{0,-16}{1,-20}{2,0}","MP_DO", "do", "\n"));
+			reserved.Add ("downto", String.Format("{0,-16}{1,-20}{2,0}","MP_DOWNTO", "downto", "\n"));
+			reserved.Add ("else", String.Format("{0,-16}{1,-20}{2,0}","MP_ELSE", "else", "\n"));
+			reserved.Add ("end", String.Format("{0,-16}{1,-20}{2,0}","MP_END", "end", "\n"));
+			reserved.Add ("false", String.Format ("{0,-16}{1,-20}{2,0}", "MP_FALSE", "false", "\n"));
+			reserved.Add ("fixed", String.Format("{0,-16}{1,-20}{2,0}","MP_FIXED", "fixed", "\n"));
+			reserved.Add ("float", String.Format("{0,-16}{1,-20}{2,0}","MP_FLOAT", "float", "\n"));
+			reserved.Add ("for", String.Format("{0,-16}{1,-20}{2,0}","MP_FOR", "for", "\n"));
+			reserved.Add ("function", String.Format("{0,-16}{1,-20}{2,0}","MP_FUNCTION", "function", "\n"));
+			reserved.Add ("if", String.Format("{0,-16}{1,-20}{2,0}","MP_IF", "if", "\n"));
+			reserved.Add ("integer", String.Format("{0,-16}{1,-20}{2,0}","MP_INTEGER", "integer", "\n"));
+			reserved.Add ("mod", String.Format("{0,-16}{1,-20}{2,0}","MP_MOD", "mod", "\n"));
+			reserved.Add ("not", String.Format("{0,-16}{1,-20}{2,0}","MP_NOT", "not", "\n"));
+			reserved.Add ("or", String.Format("{0,-16}{1,-20}{2,0}","MP_OR", "or", "\n"));
+			reserved.Add ("procedure", String.Format("{0,-16}{1,-20}{2,0}","MP_PROCEEDURE", "proceedure", "\n"));
+			reserved.Add ("program", String.Format("{0,-16}{1,-20}{2,0}","MP_PROGRAM", "program", "\n"));
+			reserved.Add ("read", String.Format("{0,-16}{1,-20}{2,0}","MP_READ", "read", "\n"));
+			reserved.Add ("repeat", String.Format("{0,-16}{1,-20}{2,0}","MP_REPEAT", "repeat", "\n"));
+			reserved.Add ("string", String.Format("{0,-16}{1,-20}{2,0}","MP_STRING", "string", "\n"));
+			reserved.Add ("then", String.Format("{0,-16}{1,-20}{2,0}","MP_THEN", "then", "\n"));
+			reserved.Add ("to", String.Format("{0,-16}{1,-20}{2,0}","MP_TO", "to", "\n"));
+			reserved.Add ("type", String.Format("{0,-16}{1,-20}{2,0}","MP_TYPE", "type", "\n"));
+			reserved.Add ("until", String.Format("{0,-16}{1,-20}{2,0}","MP_UNTIL", "until", "\n"));
+			reserved.Add ("var", String.Format("{0,-16}{1,-20}{2,0}","MP_VAR", "var", "\n"));
+			reserved.Add ("while", String.Format("{0,-16}{1,-20}{2,0}","MP_WHILE", "while", "\n"));
+			reserved.Add ("write", String.Format("{0,-16}{1,-20}{2,0}","MP_WRITE", "write", "\n"));
 
 			//read the input string with StringReader
 			using (StringReader check = new StringReader (y)) {
@@ -277,50 +281,50 @@ namespace Compilers
 						}
 
 					} else if (comp == 46) {
-						build.Append ("MP_PERIOD \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_PERIOD", ".", "\n"));
 					} else if (comp == 44) {
-						build.Append ("MP_COMMA \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_COMMA", ",", "\n"));
 					} else if (comp == 59) {
-						build.Append ("MP_SCOLON \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_SCOLON", ";", "\n"));
 					} else if (comp == 40) {
-						build.Append ("MP_LPAREN \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_LPAREN", "(", "\n"));
 					} else if (comp == 41) {
-						build.Append ("MP_RPAREN \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_RPAREN", ")", "\n"));
 					} else if (comp == 61) {
-						build.Append ("MP_EQUAL \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_EQUAL", "=", "\n"));
 					} else if (comp == 62) {
 						int i62 = check.Peek ();
 						if (i62 == 61) {
 							int junk = check.Read ();
-							build.Append ("MP_GEQUAL \n");
+							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_GEQUAL", ">=", "\n"));
 						} else {
-							build.Append ("MP_GTHAN \n");
+							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_GTHAN", ">", "\n"));
 						} 
 					} else if (comp == 60) {
 						int i60 = check.Peek ();
 						if (i60 == 61) {
 							int junk = check.Read ();
-							build.Append ("MP_LEQUAL \n");
+							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_LEQUAL", "<=", "\n"));
 						} else if (i60 == 62) {
 							int junk = check.Read ();
-							build.Append ("NEQUAL \n");
+							build.Append (String.Format("{0,-16}{1,-20}{2,0}","NEQUAL", "<>", "\n"));
 						} else {
-							build.Append ("MP_LTHAN \n");
+							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_LTHAN", ">", "\n"));
 						} 
 					} else if (comp == 58) {
 						int i58 = check.Peek ();
 						if (i58 == 61) {
 							int junk = check.Read ();
-							build.Append ("MP_ASSIGN \n");
+							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_ASSIGN", ":=", "\n"));
 						} else {
-							build.Append ("MP_COLON \n");
+							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_COLON", ":", "\n"));
 						}
 					} else if (comp == 43) {
-						build.Append ("MP_PLUS \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_PLUS", "+", "\n"));
 					} else if(comp == 47){ 
-						build.Append ("MP_FLOAT_DIVIDE \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_FLOAT_DIVIDE", "\\", "\n"));
 				}else if (comp == 45) {
-						build.Append ("MP_MINUS \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_MINUS", "-", "\n"));
 					} else if (comp == 39) {
 
 
@@ -347,7 +351,7 @@ namespace Compilers
 						}
 
 					} else if (comp == 42) {
-						build.Append ("MP_TIMES \n");
+						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_TIMES", "*", "\n"));
 					} else if (comp == 123) {
 						bool eoc = false;
 						while (!eoc) {
