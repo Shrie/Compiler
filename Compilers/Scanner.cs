@@ -63,7 +63,7 @@ namespace Compilers
 								eoc = true;
 								//column_counter++;
 
-							} else if(comp2 == 13 ||comp2 == 133 |comp2 == -1) {
+							} else if(comp2 == 13 ||comp2 == 133) {
 								lexeme.Append ((char)win.Read ());
 								add_count = 0;
 								row_add++;
