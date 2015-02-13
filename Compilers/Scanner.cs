@@ -7,6 +7,8 @@ namespace Compilers
 {
 	public class Scanner
 	{
+		static int row_counter = 1;
+		static int column_counter = 1;
 	
 		//constructor
 		static Scanner ()
@@ -29,60 +31,83 @@ namespace Compilers
 
 				//loop while the next char is not end of file
 				while (win.Peek () != -1) {
-					//chomp whitespace until next no empty char
-					if (Char.IsWhiteSpace ((char)win.Peek ())) {
+					//chomp whitespace until next non empty char
+					if (win.Peek() == 13 ||win.Peek() == 133 ||win.Peek() == -1) {
+						column_counter = 1;
+						row_counter++;
+						int junk = win.Read ();
+					}
+
+					else if (Char.IsWhiteSpace ((char)win.Peek ())) {
 						char junk = (char)win.Read ();
-					} else if (win.Peek () == 123) {
-						int junk3 = win.Read ();
+						column_counter++;
+					} 
+					//check for a comment
+					//has to happen in the dispatcher at this point
+					else if (win.Peek () == 123) {
+						//build the comment into a lexeme
+						StringBuilder lexeme = new StringBuilder ();
+						lexeme.Append ((char)win.Read ());
+						column_counter++;
+
 						bool eoc = false;
 						bool err_flag = false;
 						while (!eoc) {
 							int comp2 = win.Peek ();
 							if (comp2 == 125) {
-								int junk = win.Read ();
+								lexeme.Append ((char)win.Read ());
 								eoc = true;
+								column_counter++;
 							} else if (comp2 == -1) {
 
-								tokenizer.Append ("MP_RUN_COMMENT \n");
+								tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_RUN_COMMENT", lexeme.ToString (), row_counter, column_counter, "\n"));
 								eoc = true;
 								err_flag = true;
 							} else if (Char.IsWhiteSpace ((char)comp2)) {
-								int junk2 = win.Read ();
+								lexeme.Append ((char)win.Read ());
+								column_counter++;
 							} else {
-								int junk = win.Read ();
+								lexeme.Append ((char)win.Read ());
+								column_counter++;
 							}
 
 						}
 						//int junk2 = check.Read();
 						if (!err_flag) {
-							tokenizer.Append ("MP_COMMENT \n");
+							tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COMMENT", lexeme.ToString (), row_counter, column_counter, "\n"));
 						}
 					} else if (win.Peek () == 39) {
-						int junk3 = win.Read ();
+						//build the string into a lexeme
+						StringBuilder lexeme = new StringBuilder ();
+						lexeme.Append ((char)win.Read ());
+						column_counter++;
 
 						bool run_flag = false;
-						bool eoc = false;
-						while (!eoc) {
-							//int junk3 = win.Read ();
+						bool eos = false;
+						while (!eos) {
+
 							int comp2 = win.Peek ();
 							if (comp2 == 39) {
-								int junk = win.Read ();
-								eoc = true;
+								lexeme.Append ((char)win.Read ());
+								eos = true;
+								column_counter++;
 							} else if (comp2 == 13 || comp2 == 133 || comp2 == -1) {
 
-								tokenizer.Append ("MP_STRING_RUN \n");
-								eoc = true;
+								tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING_RUN", lexeme.ToString (), row_counter, column_counter, "\n"));
+								eos = true;
 								run_flag = true;
 							} else if (Char.IsWhiteSpace ((char)comp2) || comp2 == -1) {
-								int junk2 = win.Read ();
+								lexeme.Append ((char)win.Read ());
+								column_counter++;
 							} else {
-								int junk = win.Read ();
+								lexeme.Append ((char)win.Read ());
+								column_counter++;
 							}
 
 						}
 						//int junk2 = check.Read();
 						if (!run_flag) {
-							tokenizer.Append ("MP_STRING_LIT \n");
+							tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
 						}
 					}
 					//when a char is found, build a string to feed to a scanner
@@ -126,36 +151,36 @@ namespace Compilers
 			StringBuilder build = new StringBuilder ();
 
 			Dictionary<string, string> reserved = new Dictionary<string, string> ();
-			reserved.Add ("and", String.Format("{0,-16}{1,-20}{2,0}","MP_AND", "and", "\n"));
-			reserved.Add ("begin", String.Format("{0,-16}{1,-20}{2,0}","MP_BEGIN", "begin", "\n"));
-			reserved.Add ("Boolean", String.Format ("{0,-16}{1,-20}{2,0}", "MP_BOOLEAN", "Boolea", "\n"));
-			reserved.Add ("div", String.Format("{0,-16}{1,-20}{2,0}","MP_DIV", "div", "\n"));
-			reserved.Add ("do", String.Format("{0,-16}{1,-20}{2,0}","MP_DO", "do", "\n"));
-			reserved.Add ("downto", String.Format("{0,-16}{1,-20}{2,0}","MP_DOWNTO", "downto", "\n"));
-			reserved.Add ("else", String.Format("{0,-16}{1,-20}{2,0}","MP_ELSE", "else", "\n"));
-			reserved.Add ("end", String.Format("{0,-16}{1,-20}{2,0}","MP_END", "end", "\n"));
-			reserved.Add ("false", String.Format ("{0,-16}{1,-20}{2,0}", "MP_FALSE", "false", "\n"));
-			reserved.Add ("fixed", String.Format("{0,-16}{1,-20}{2,0}","MP_FIXED", "fixed", "\n"));
-			reserved.Add ("float", String.Format("{0,-16}{1,-20}{2,0}","MP_FLOAT", "float", "\n"));
-			reserved.Add ("for", String.Format("{0,-16}{1,-20}{2,0}","MP_FOR", "for", "\n"));
-			reserved.Add ("function", String.Format("{0,-16}{1,-20}{2,0}","MP_FUNCTION", "function", "\n"));
-			reserved.Add ("if", String.Format("{0,-16}{1,-20}{2,0}","MP_IF", "if", "\n"));
-			reserved.Add ("integer", String.Format("{0,-16}{1,-20}{2,0}","MP_INTEGER", "integer", "\n"));
-			reserved.Add ("mod", String.Format("{0,-16}{1,-20}{2,0}","MP_MOD", "mod", "\n"));
-			reserved.Add ("not", String.Format("{0,-16}{1,-20}{2,0}","MP_NOT", "not", "\n"));
-			reserved.Add ("or", String.Format("{0,-16}{1,-20}{2,0}","MP_OR", "or", "\n"));
-			reserved.Add ("procedure", String.Format("{0,-16}{1,-20}{2,0}","MP_PROCEEDURE", "proceedure", "\n"));
-			reserved.Add ("program", String.Format("{0,-16}{1,-20}{2,0}","MP_PROGRAM", "program", "\n"));
-			reserved.Add ("read", String.Format("{0,-16}{1,-20}{2,0}","MP_READ", "read", "\n"));
-			reserved.Add ("repeat", String.Format("{0,-16}{1,-20}{2,0}","MP_REPEAT", "repeat", "\n"));
-			reserved.Add ("string", String.Format("{0,-16}{1,-20}{2,0}","MP_STRING", "string", "\n"));
-			reserved.Add ("then", String.Format("{0,-16}{1,-20}{2,0}","MP_THEN", "then", "\n"));
-			reserved.Add ("to", String.Format("{0,-16}{1,-20}{2,0}","MP_TO", "to", "\n"));
-			reserved.Add ("type", String.Format("{0,-16}{1,-20}{2,0}","MP_TYPE", "type", "\n"));
-			reserved.Add ("until", String.Format("{0,-16}{1,-20}{2,0}","MP_UNTIL", "until", "\n"));
-			reserved.Add ("var", String.Format("{0,-16}{1,-20}{2,0}","MP_VAR", "var", "\n"));
-			reserved.Add ("while", String.Format("{0,-16}{1,-20}{2,0}","MP_WHILE", "while", "\n"));
-			reserved.Add ("write", String.Format("{0,-16}{1,-20}{2,0}","MP_WRITE", "write", "\n"));
+			reserved.Add ("and", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_AND", "and", row_counter, column_counter, "\n"));
+			reserved.Add ("begin", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BEGIN", "begin", row_counter, column_counter, "\n"));
+			reserved.Add ("Boolean", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BOOLEAN", "Boolean", row_counter, column_counter, "\n"));
+			reserved.Add ("div", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DIV", "div", row_counter, column_counter, "\n"));
+			reserved.Add ("do", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DO", "do", row_counter, column_counter, "\n"));
+			reserved.Add ("downto", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DOWNTO", "downto", row_counter, column_counter, "\n"));
+			reserved.Add ("else", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ELSE", "else", row_counter, column_counter, "\n"));
+			reserved.Add ("end", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_END", "end", row_counter, column_counter, "\n"));
+			reserved.Add ("false", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FALSE", "false", row_counter, column_counter, "\n"));
+			reserved.Add ("fixed", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FIXED", "fixed", row_counter, column_counter, "\n"));
+			reserved.Add ("float", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT", "float", row_counter, column_counter, "\n"));
+			reserved.Add ("for", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FOR", "for", row_counter, column_counter, "\n"));
+			reserved.Add ("function", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FUNCTION", "function", row_counter, column_counter, "\n"));
+			reserved.Add ("if", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IF", "if", row_counter, column_counter, "\n"));
+			reserved.Add ("integer", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_INTEGER", "integer", row_counter, column_counter, "\n"));
+			reserved.Add ("mod", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_MOD", "mod", row_counter, column_counter, "\n"));
+			reserved.Add ("not", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_NOT", "not", row_counter, column_counter, "\n"));
+			reserved.Add ("or", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_OR", "or", row_counter, column_counter, "\n"));
+			reserved.Add ("procedure", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PROCEDURE", "procedure", row_counter, column_counter, "\n"));
+			reserved.Add ("program", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PROGRAM", "program", row_counter, column_counter, "\n"));
+			reserved.Add ("read", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_READ", "read", row_counter, column_counter, "\n"));
+			reserved.Add ("repeat", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_REPEAT", "repeat", row_counter, column_counter, "\n"));
+			reserved.Add ("string", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING", "string", row_counter, column_counter, "\n"));
+			reserved.Add ("then", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_THEN", "then", row_counter, column_counter, "\n"));
+			reserved.Add ("to", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TO", "to", row_counter, column_counter, "\n"));
+			reserved.Add ("type", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TYPE", "type", row_counter, column_counter, "\n"));
+			reserved.Add ("until", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_UNTIL", "until", row_counter, column_counter, "\n"));
+			reserved.Add ("var", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_VAR", "var", row_counter, column_counter, "\n"));
+			reserved.Add ("while", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WHILE", "while", row_counter, column_counter, "\n"));
+			reserved.Add ("write", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WRITE", "write", row_counter, column_counter, "\n"));
 
 			//read the input string with StringReader
 			using (StringReader check = new StringReader (y)) {
@@ -167,6 +192,7 @@ namespace Compilers
 
 					//store next char's decimal value in comp
 					int comp = check.Read ();
+					column_counter++;
 
 					//check if first char is A-Z,a-z, or _
 					//if it is, it's an identifier
@@ -181,6 +207,7 @@ namespace Compilers
 							if ((comp2 >= 65 && comp2 <= 90) || (comp2 >= 97 && comp2 <= 122) || (comp2 == 95) || (comp2 >= 48 && comp <= 57)) {
 								//consume the next char
 								id_build.Append ((char)check.Read ());
+								column_counter++;
 							} else {
 
 								//check if the id is a reserved word
@@ -190,7 +217,7 @@ namespace Compilers
 									build.Append (res);
 								} catch (KeyNotFoundException) {
 									//reached the end of the id, return id token and exit the loop
-									build.Append ("MP_IDENTIFIER \n");
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IDENTIFIER", res_check.ToString (), row_counter, column_counter, "\n"));
 								}
 
 
@@ -202,8 +229,12 @@ namespace Compilers
 					//check if it begins with a decimal
 					//if yes, then it is either a int, fixed, or float
 					else if (comp >= 48 && comp <= 57) {
+						//build a lexeme string while it's reading the chars
+						StringBuilder lexeme = new StringBuilder ();
+						lexeme.Append ((char)comp);
 
 						//grab the rest of the number in a while loop
+						//flags to check the type of number
 						bool is_num = true;
 						bool is_fixed = false;
 						bool is_float = false;
@@ -211,57 +242,71 @@ namespace Compilers
 							//see if the next char is also part of the number
 							int comp2 = check.Peek ();
 							if (comp2 >= 48 && comp2 <= 57) {
-								//consume the next char
-								int junk = check.Read ();
+								//append the number to the lexeme
+								lexeme.Append ((char)check.Read ());
+								column_counter++;
 							}
 							//if it's a decimal point it could be a fixed or float
 							else if (comp2 == 46) {
-								if (is_fixed) {
-									build.Append ("MP_ERROR \n");
+								if (is_fixed || is_float) {
+									//it already contains a decimal, so it's an error
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
 									is_num = false;
 								} else {
+									//the number could be a fixed point or float
 									is_fixed = true;
 								}
-								int junk = check.Read ();
+								//append the decimal to the lexeme
+								lexeme.Append ((char)check.Read ());
+								column_counter++;
 
 								//make sure the next char is a digit
 								//otherwise it's an error
 								int err_spot = check.Peek ();
 								if (err_spot >= 48 && err_spot <= 57) {
-
+									//the next char is a digit, do nothing
 								} else {
-									build.Append ("MP_ERROR \n");
+									//not a digit, raise an error flag
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
 									is_num = false;
 								}
 							}
 							//if it's an e or E, then it's a float
 							else if (comp2 == 69 || comp2 == 101) {
 								if (is_float) {
-									build.Append ("MP_ERROR \n");
+									//the number already contained an e or E
+									//it's an error
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
 									is_num = false;
 								} else {
+									//mark the float flag
 									is_float = true;
 								}
-								int junk = check.Read ();
+								//append the e or E to the lexeme
+								lexeme.Append ((char)check.Read ());
+								column_counter++;
 
 								//make sure the next char is a digit or minus sign
 								int err_spot = check.Peek ();
 								if (err_spot == 45) {
 									//see if the minus sign is followed by a digit
-									int junk2 = check.Read ();
+									lexeme.Append ((char)check.Read ());
+									column_counter++;
 									int err_spot2 = check.Peek ();
 									if (err_spot2 >= 48 && err_spot2 <= 57) {
-
+										//found a digit, all is well
 									} else {
-										build.Append ("MP_ERROR \n");
+										//not a digit, return an error
+										build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
 										is_num = false;
 									}
 								}
 								//check if the E is followed by a digit
 								else if (err_spot >= 48 && err_spot <= 57) {
-
+									//found a digit, everything checks out
 								} else {
-									build.Append ("MP_ERROR \n");
+									//no digit, no token for you
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
 									is_num = false;
 								}
 							} else {
@@ -269,122 +314,77 @@ namespace Compilers
 								//number it is based on the flags
 
 								if (is_float) {
-									build.Append ("MP_FLOAT_LIT \n");
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT", lexeme.ToString (), row_counter, column_counter, "\n"));
 								} else if (is_fixed) {
-									build.Append ("MP_FIXED_LIT \n");
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FIXED", lexeme.ToString (), row_counter, column_counter, "\n"));
 								} else {
-									build.Append ("MP_INTEGER_LIT \n");
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_INTEGER", lexeme.ToString (), row_counter, column_counter, "\n"));
 								}
-
+								//mark the next symbol as not part of the number
+								//exit the loop
 								is_num = false;
 							}
 						}
 
 					} else if (comp == 46) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_PERIOD", ".", "\n"));
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PERIOD", ".", row_counter, column_counter, "\n"));
 					} else if (comp == 44) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_COMMA", ",", "\n"));
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COMMA", ",", row_counter, column_counter, "\n"));
 					} else if (comp == 59) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_SCOLON", ";", "\n"));
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_SCOLON", ";", row_counter, column_counter, "\n"));
 					} else if (comp == 40) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_LPAREN", "(", "\n"));
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LPAREN", "(", row_counter, column_counter, "\n"));
 					} else if (comp == 41) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_RPAREN", ")", "\n"));
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_RPAREN", ")", row_counter, column_counter, "\n"));
 					} else if (comp == 61) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_EQUAL", "=", "\n"));
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_EQUAL", "=", row_counter, column_counter, "\n"));
 					} else if (comp == 62) {
 						int i62 = check.Peek ();
 						if (i62 == 61) {
 							int junk = check.Read ();
-							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_GEQUAL", ">=", "\n"));
+							column_counter++;
+							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_GEQUAL", ">=", row_counter, column_counter, "\n"));
 						} else {
-							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_GTHAN", ">", "\n"));
+							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_GTHAN", ">", row_counter, column_counter, "\n"));
 						} 
 					} else if (comp == 60) {
 						int i60 = check.Peek ();
 						if (i60 == 61) {
 							int junk = check.Read ();
-							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_LEQUAL", "<=", "\n"));
+							column_counter++;
+							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LEQUAL", "<=", row_counter, column_counter, "\n"));
 						} else if (i60 == 62) {
 							int junk = check.Read ();
-							build.Append (String.Format("{0,-16}{1,-20}{2,0}","NEQUAL", "<>", "\n"));
+							column_counter++;
+							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_NEQUAL", "<>", row_counter, column_counter, "\n"));
 						} else {
-							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_LTHAN", ">", "\n"));
+							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LTHAN", "<", row_counter, column_counter, "\n"));
 						} 
 					} else if (comp == 58) {
 						int i58 = check.Peek ();
 						if (i58 == 61) {
 							int junk = check.Read ();
-							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_ASSIGN", ":=", "\n"));
+							column_counter++;
+							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ASSIGN", ":=", row_counter, column_counter, "\n"));
 						} else {
-							build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_COLON", ":", "\n"));
+							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COLON", ":", row_counter, column_counter, "\n"));
 						}
 					} else if (comp == 43) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_PLUS", "+", "\n"));
-					} else if(comp == 47){ 
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_FLOAT_DIVIDE", "\\", "\n"));
-				}else if (comp == 45) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_MINUS", "-", "\n"));
-					} else if (comp == 39) {
-
-
-						bool eos = false;
-						while (!eos) {
-							int comp2 = check.Peek ();
-							bool white_space2 = Char.IsWhiteSpace ((char)comp2);
-							if (comp2 == 39) {
-								int junk = check.Read ();
-								int comp3 = check.Peek ();
-								if (comp3 == 39) {
-									int junk2 = check.Read ();
-								} else {
-									int junk2 = check.Read ();
-									build.Append ("MP_STRING_LIT \n");
-									eos = true;
-								}
-							} else if (white_space2) {
-								int junky = check.Read ();
-							} else {
-								int junk = check.Read ();
-							}
-
-						}
-
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PLUS", "+", row_counter, column_counter, "\n"));
+					} else if (comp == 47) { 
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DIVIDE", "\\", row_counter, column_counter, "\n"));
+					} else if (comp == 45) {
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_MINUS", "-", row_counter, column_counter, "\n"));
 					} else if (comp == 42) {
-						build.Append (String.Format("{0,-16}{1,-20}{2,0}","MP_TIMES", "*", "\n"));
-					} else if (comp == 123) {
-						bool eoc = false;
-						while (!eoc) {
-							int comp2 = check.Peek ();
-							if (comp2 == 125) {
-								int junk = check.Read ();
-								eoc = true;
-							} else if (Char.IsWhiteSpace ((char)comp2) || comp2 == -1) {
-								int junk2 = check.Read ();
-								Console.Write ("no");
-							} else {
-								int junk = check.Read ();
-							}
-
-						}
-						//int junk2 = check.Read();
-						build.Append ("MP_COMMENT \n");
-					}
-							
-					//check for apostrophe
-					//apostrophe starts a string literal
-					else if (false) {
-
-					} else if (false) {
-						//OTHER SCANNERS GO HERE
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TIMES", "*", row_counter, column_counter, "\n"));
 					} else {
-						Console.Write (comp);
+						//Console.Write (comp);
 						//character unrecognized, append error to string
-						build.Append ("MP_ERROR \n");
+						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", (char)comp, row_counter, column_counter, "\n"));
 					}
 
 					white_space = Char.IsWhiteSpace ((char)check.Peek ());
-					if (check.Peek () == -1) {
+					if (check.Peek () == -1 || check.Peek() == 123 || check.Peek() == 39) {
 						white_space = true;
 					}
 
