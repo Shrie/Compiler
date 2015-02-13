@@ -1,6 +1,6 @@
 ### Compiler
 
-Writing a compiler in c# to compile micro pascal
+Writing a compiler in C# to compile micro pascal
 
 
 We are Team 9, Team BSoD
