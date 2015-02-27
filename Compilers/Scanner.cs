@@ -176,7 +176,7 @@ namespace Compilers
 			Dictionary<string, string> reserved = new Dictionary<string, string> ();
 			reserved.Add ("and", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_AND", "and", row_counter, column_counter, "\n"));
 			reserved.Add ("begin", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BEGIN", "begin", row_counter, column_counter, "\n"));
-			reserved.Add ("Boolean", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BOOLEAN", "Boolean", row_counter, column_counter, "\n"));
+			reserved.Add ("boolean", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BOOLEAN", "boolean", row_counter, column_counter, "\n"));
 			reserved.Add ("div", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DIV", "div", row_counter, column_counter, "\n"));
 			reserved.Add ("do", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DO", "do", row_counter, column_counter, "\n"));
 			reserved.Add ("downto", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DOWNTO", "downto", row_counter, column_counter, "\n"));
@@ -237,12 +237,14 @@ namespace Compilers
 
 								//check if the id is a reserved word
 								string res_check = id_build.ToString ();
+								string lower_case = res_check.ToLower ();
 								try {
-									string res = reserved [res_check];
+									string res = reserved [lower_case];
 									build.Append (res);
 								} catch (KeyNotFoundException) {
 									//reached the end of the id, return id token and exit the loop
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IDENTIFIER", res_check.ToString (), row_counter, column_counter, "\n"));
+
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IDENTIFIER", lower_case.ToString (), row_counter, column_counter, "\n"));
 									column_counter += add_count;
 									add_count = 0;
 								}
