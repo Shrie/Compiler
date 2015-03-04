@@ -353,15 +353,15 @@ namespace Compilers
 								//number it is based on the flags
 
 								if (is_float) {
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT", lexeme.ToString (), row_counter, column_counter, "\n"));
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
 									column_counter += add_count;
 									add_count = 0;
 								} else if (is_fixed) {
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FIXED", lexeme.ToString (), row_counter, column_counter, "\n"));
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FIXED_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
 									column_counter += add_count;
 									add_count = 0;
 								} else {
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_INTEGER", lexeme.ToString (), row_counter, column_counter, "\n"));
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_INTEGER_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
 									column_counter += add_count;
 									add_count = 0;
 								}
