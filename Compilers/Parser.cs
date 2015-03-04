@@ -1,16 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Text;
+using System.IO;
 
 namespace Compilers
 {
 	public class Parser
 	{
-		Dictionary<string, Dictionary<string,int>> lltable = new Dictionary<string, Dictionary<string,int>>();
-		Stack rock = new Stack();
+		private Dictionary<string, Dictionary<string,int>> lltable = new Dictionary<string, Dictionary<string,int>>();
+		private Stack rock = new Stack();
+		private StringReader tokens;
 
-		public Parser ()
+		public Parser (string tokens_in)
 		{
+			//initialize StringReader instance
+			tokens = new StringReader (tokens_in);
+
+			//initialize stack with <SystemGoal> and $
+			//$ is the end of parse token
+			rock.Push ("$");
+			rock.Push ("<SystemGoal>");
+
+			//fill in the Dictionary using the LL(1) Table
+			//will allow constant time look up for which rule to apply
 			Dictionary<string, int> inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PROGRAM", 1);
 			lltable.Add ("<SystemGoal>", inner_dict);
@@ -40,7 +53,7 @@ namespace Compilers
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_IDENTIFIER", 9);
-			lltable.Add ("<VariableDeclarationPart>", inner_dict);
+			lltable.Add ("<VariableDeclaration>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_INTEGER", 10);
@@ -94,9 +107,6 @@ namespace Compilers
 			inner_dict.Add ("MP_VAR", 28);
 			lltable.Add ("<VariableParameterSection>", inner_dict);
 
-			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_VAR", 28);
-			lltable.Add ("<VariableParameterSection>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_BEGIN", 29);
@@ -365,29 +375,100 @@ namespace Compilers
 			inner_dict.Add ("MP_IDENTIFIER", 116);
 			lltable.Add ("<VariableIdentifier>", inner_dict);
 
-
-
-//			Dictionary<string,int> holyCow = lltable["<SystemGoal>"];
-//			int printy = holyCow ["MP_PROGRAM"];
-//			Console.WriteLine (printy);
 		}
 
-		public void Parse(string of_tokens){
 
+		//Parse function checks to see if the input stream of tokens is a valid program
+		public void Parse(){
+			string nextToken;
+			string nextStackToken;
+			Boolean continueParse = true;
+			nextToken = Peek ();
+			while(continueParse){
+
+				nextStackToken = StackPeek ();
+
+				if (nextStackToken == nextToken) {
+					nextToken = Peek ();
+					nextStackToken = StackPeek ();
+				} else {
+					try{
+						Dictionary<string, int> inside = lltable[nextStackToken];
+						int rule = inside[nextToken];
+
+						//use a rule function based on what int (rule number) was recieved from the Dictionary
+						switch(rule){
+						case 1:
+							Rule1();
+							break;
+						case 2:
+							Rule2();
+							break;
+						default:
+							Console.WriteLine("What the hell did you do!?");
+							break;
+						}
+
+					}catch(KeyNotFoundException){
+						Console.WriteLine ("Syntax Error.");
+					}
+				}
+
+
+
+				if (nextStackToken == "$") {
+					continueParse = false;
+				}
+			}
 		}
 
+		//grab the next token from the token stream
 		public string Peek(){
-			string nothing = "";
-			return nothing;
+			//grab the next token, lexeme, column & row number
+			string currentLine = tokens.ReadLine();
+			string nextToken;
+			StringBuilder token = new StringBuilder ();
+			//grab just the token from the front of the line
+			using (StringReader grabToken = new StringReader(currentLine)){
+				Boolean isToken = true;
+				while (isToken) {
+					if (Char.IsWhiteSpace ((char)grabToken.Peek ())) {
+						isToken = false;
+					} else {
+						token.Append ((char)grabToken.Read());
+					}
+				}
+			}
+			//dump the token in a string and return it
+			nextToken = token.ToString ();
+			//Console.Write (nextToken);
+			return nextToken;
 		}
 
+		//peek at the top symbol on the stack
 		public string StackPeek(){
-			string nothing = "";
+			//pop the top symbol off the stack and return it.
+			string nothing = (string)rock.Pop();
+			//Console.Write (nothing);
 			return nothing;
 		}
 
 
+		//The rules from the grammar, just push the right hand side
+		//of the grammar rule onto the stack from right to left.
+		void Rule1(){
+			Console.WriteLine ("Rule 1 used");
+			rock.Push ("MP_EOF");
+			rock.Push ("<Program>");
+		}
 
+		void Rule2(){
+			Console.WriteLine ("Rule 2 used");
+			rock.Push ("MP_PERIOD");
+			rock.Push ("<Block>");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<ProgramHeading>");
+		}
 	}
 }
 

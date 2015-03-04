@@ -240,6 +240,7 @@ namespace Compilers
 								try {
 									string res = reserved [res_check];
 									build.Append (res);
+									column_counter += add_count;
 								} catch (KeyNotFoundException) {
 									//reached the end of the id, return id token and exit the loop
 									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IDENTIFIER", res_check.ToString (), row_counter, column_counter, "\n"));
