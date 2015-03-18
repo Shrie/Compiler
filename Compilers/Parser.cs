@@ -469,6 +469,120 @@ namespace Compilers
 			rock.Push ("MP_SCOLON");
 			rock.Push ("<ProgramHeading>");
 		}
+
+		void Rule3(){
+			Console.WriteLine ("Rule 3 used");
+			rock.Push ("MP_PROGRAM");
+			rock.Push ("<ProgramIdentifier>");
+		
+		}
+
+		void Rule4(){
+			Console.WriteLine ("Rule 4 used");
+			rock.Push ("<VariableDeclarationPart>");
+			rock.Push ("<ProcedureAndFunctionDeclationPart>");
+			rock.Push ("<StatementPart>");
+		}
+
+		void Rule5(){
+			Console.WriteLine ("Rule 5 used");
+			rock.Push ("MP_VAR");
+			rock.Push ("<VariableDeclaration>");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<VariableDeclarationTail>");		
+		}
+
+		void Rule6(){
+			Console.WriteLine ("Rule 6 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule7(){
+			Console.WriteLine ("Rule 7 used");
+			rock.Push ("<VariableDeclaration>");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<VariableDeclarationTail>");
+		}
+
+		void Rule8(){
+			Console.WriteLine ("Rule 8 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule9(){
+			Console.WriteLine ("Rule 9 used");
+			rock.Push ("<IdentifierList>");
+			rock.Push ("MP_COLON");
+			rock.Push ("<Type>");
+		}
+
+		void Rule10(){
+			Console.WriteLine ("Rule 10 used");
+			rock.Push ("MP_INTEGER");
+		}
+
+		void Rule11(){
+			Console.WriteLine ("Rule 11 used");
+			rock.Push ("MP_FLOAT");
+		}
+
+		void Rule12(){
+			Console.WriteLine ("Rule 12 used");
+			rock.Push ("MP_STRING");
+		}
+
+		void Rule13(){
+			Console.WriteLine ("Rule 13 used");
+			rock.Push ("MP_BOOLEAN");
+		}
+
+		void Rule13(){
+			Console.WriteLine ("Rule 13 used");
+			rock.Push ("<ProcedureDeclaration>");
+			rock.Push ("<ProcedureAndFunctionDeclarationPart>");
+		}
+
+		void Rule14(){
+			Console.WriteLine ("Rule 14 used");
+			rock.Push ("<FunctionDeclaration>");
+			rock.Push ("<ProcedureAndFunctionDeclarationPart>");
+		}
+
+		void Rule15(){
+			Console.WriteLine ("Rule 15 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule16(){
+			Console.WriteLine ("Rule 16 used");
+			rock.Push ("<ProcedureHeading>");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<Block>");
+			rock.Push ("MP_SCOLON");
+		}
+
+		void Rule17(){
+			Console.WriteLine ("Rule 17 used");
+			rock.Push ("<FunctionHeading>");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<Block>");
+			rock.Push ("MP_SCOLON");
+		}
+
+		void Rule18(){
+			Console.WriteLine ("Rule 18 used");
+			rock.Push ("<ProcedureHeading>");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<Block>");
+			rock.Push ("MP_SCOLON");
+		}
+
+		void Rule19(){
+			Console.WriteLine ("Rule 19 used");
+			rock.Push ("MP_PROCEDURE");
+			rock.Push ("<ProcedureIdentifier");
+			rock.Push ("<OptionalFormalParameterList>");
+		}
 	}
 }
 
