@@ -903,6 +903,112 @@ namespace Compilers
 			rock.Push ("<ActualParameter>");
 			rock.Push ("<ActualParameterTail>");
 		}
+
+		void Rule71(){
+			Console.WriteLine ("Rule 71 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule72(){
+			Console.WriteLine ("Rule 72 used");
+			rock.Push ("<OridnalExpression>");
+		}
+
+		void Rule73(){
+			Console.WriteLine ("Rule 73 used");
+			rock.Push ("<SimpleExpression>");
+			rock.Push ("<OptionalRelationalPart>");
+		}
+
+		void Rule74(){
+			Console.WriteLine ("Rule 74 used");
+			rock.Push ("<SimpleExpression>");
+			rock.Push ("<OptionalRelationalPart>");
+		}
+
+		void Rule75(){
+			Console.WriteLine ("Rule 75 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule76(){
+			Console.WriteLine ("Rule 76 used");
+			rock.Push ("MP_EQUAL");
+		}
+
+		void Rule77(){
+			Console.WriteLine ("Rule 77 used");
+			rock.Push ("MP_LTHAN");
+		}
+
+		void Rule78(){
+			Console.WriteLine ("Rule 78 used");
+			rock.Push ("MP_GTHAN");
+		}
+
+		void Rule79(){
+			Console.WriteLine ("Rule 79 used");
+			rock.Push ("MP_LEQUAL");
+		}
+
+		void Rule80(){
+			Console.WriteLine ("Rule 80 used");
+			rock.Push ("MP_GEQUAL");
+		}
+
+		void Rule81(){
+			Console.WriteLine ("Rule 81 used");
+			rock.Push ("MP_NEQUAL");
+		}
+
+		void Rule82(){
+			Console.WriteLine ("Rule 82 used");
+			rock.Push ("<OptionalSign>");
+			rock.Push ("<Term>");
+			rock.Push ("<TermTail>");
+		}
+
+		void Rule83(){
+			Console.WriteLine ("Rule 83 used");
+			rock.Push ("<AddingOperator>");
+			rock.Push ("<Term>");
+			rock.Push ("<TermTail>");
+		}
+
+		void Rule84(){
+			Console.WriteLine ("Rule 84 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule85(){
+			Console.WriteLine ("Rule 85 used");
+			rock.Push ("MP_PLUS");
+		}
+
+		void Rule86(){
+			Console.WriteLine ("Rule 86 used");
+			rock.Push ("MP_MINUS");
+		}
+
+		void Rule87(){
+			Console.WriteLine ("Rule 87 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule88(){
+			Console.WriteLine ("Rule 88 used");
+			rock.Push ("MP_PLUS");
+		}
+
+		void Rule89(){
+			Console.WriteLine ("Rule 89 used");
+			rock.Push ("MP_MINUS");
+		}
+
+		void Rule90(){
+			Console.WriteLine ("Rule 90 used");
+			rock.Push ("MP_OR");
+		}
 	}
 }
 
