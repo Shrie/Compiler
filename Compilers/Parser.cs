@@ -1009,6 +1009,141 @@ namespace Compilers
 			Console.WriteLine ("Rule 90 used");
 			rock.Push ("MP_OR");
 		}
+
+		void Rule91(){
+			Console.WriteLine ("Rule 91 used");
+			rock.Push ("<Factor>");
+			rock.Push ("<FactorTail>");
+		}
+
+		void Rule92(){
+			Console.WriteLine ("Rule 92 used");
+			rock.Push ("<MultiplyingOperator>");
+			rock.Push ("<Factor>");
+			rock.Push ("<FactorTail>");
+		}
+
+		void Rule93(){
+			Console.WriteLine ("Rule 93 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule94(){
+			Console.WriteLine ("Rule 94 used");
+			rock.Push ("MP_TIMES");
+		}
+
+		void Rule95(){
+			Console.WriteLine ("Rule 95 used");
+			rock.Push ("MP_DIVIDE");
+		}
+
+		void Rule96(){
+			Console.WriteLine ("Rule 96 used");
+			rock.Push ("MP_DIV");
+		}
+
+		void Rule97(){
+			Console.WriteLine ("Rule 97 used");
+			rock.Push ("MP_MOD");
+		}
+
+		void Rule98(){
+			Console.WriteLine ("Rule 98 used");
+			rock.Push ("MP_AND");
+		}
+
+		void Rule99(){
+			Console.WriteLine ("Rule 99 used");
+			rock.Push ("<UnsignedInteger>");
+		}
+
+		void Rule100(){
+			Console.WriteLine ("Rule 100 used");
+			rock.Push ("<UnsignedFloat>");
+		}
+
+		void Rule101(){
+			Console.WriteLine ("Rule 101 used");
+			rock.Push ("<StringLiteral>");
+		}
+
+		void Rule102(){
+			Console.WriteLine ("Rule 102 used");
+			rock.Push ("MP_TRUE");
+		}
+
+		void Rule103(){
+			Console.WriteLine ("Rule 103 used");
+			rock.Push ("MP_FALSE");
+		}
+
+		void Rule104(){
+			Console.WriteLine ("Rule 104 used");
+			rock.Push ("MP_NOT");
+			rock.Push ("<Factor>");
+		}
+
+		void Rule105(){
+			Console.WriteLine ("Rule 105 used");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("<Expression>");
+			rock.Push ("MP_RPAREN");
+		}
+
+		void Rule106(){
+			Console.WriteLine ("Rule 106 used");
+			rock.Push ("<FunctionIdentifier>");
+			rock.Push ("<OptionalActualParameterList>");
+		}
+
+		void Rule107(){
+			Console.WriteLine ("Rule 107 used");
+			rock.Push ("<Identifier>");
+		}
+
+		void Rule108(){
+			Console.WriteLine ("Rule 108 used");
+			rock.Push ("<Identifier>");
+		}
+
+		void Rule109(){
+			Console.WriteLine ("Rule 109 used");
+			rock.Push ("<Identifier>");
+		}
+
+		void Rule110(){
+			Console.WriteLine ("Rule 110 used");
+			rock.Push ("<Identifier>");
+		}
+
+		void Rule111(){
+			Console.WriteLine ("Rule 111 used");
+			rock.Push ("<Expression>");
+		}
+
+		void Rule112(){
+			Console.WriteLine ("Rule 112 used");
+			rock.Push ("<Expression>");
+		}
+
+		void Rule113(){
+			Console.WriteLine ("Rule 113 used");
+			rock.Push ("<Identifier>");
+			rock.Push ("<IdentifierTail>");
+		}
+
+		void Rule114(){
+			Console.WriteLine ("Rule 114 used");
+			rock.Push ("MP_COMMA");
+			rock.Push ("<Identifier>");
+			rock.Push ("<IdentifierTail>");
+		}
+
+		void Rule115(){
+			Console.WriteLine ("Rule 115 used");
+			rock.Push ("MP_EPSILON");
+		}
 	}
 }
 
