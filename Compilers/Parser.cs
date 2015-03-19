@@ -771,6 +771,138 @@ namespace Compilers
 			rock.Push ("<WriteParameterTail>");
 			rock.Push ("MP_RPAREN");
 		}
+
+		void Rule51(){
+			Console.WriteLine ("Rule 51 used");
+			rock.Push ("MP_COMMA");
+			rock.Push ("<WriteParameter>");
+			rock.Push ("<WriteParameterTail>");
+		}
+
+		void Rule52(){
+			Console.WriteLine ("Rule 52 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule53(){
+			Console.WriteLine ("Rule 53 used");
+			rock.Push ("<OrdinalExpression>");
+		}
+
+		void Rule54(){
+			Console.WriteLine ("Rule 54 used");
+			rock.Push ("<VariableIdentifier>");
+			rock.Push ("MP_ASSIGN");
+			rock.Push ("<Expression>");
+		}
+
+		void Rule55(){
+			Console.WriteLine ("Rule 55 used");
+			rock.Push ("<FunctionIdentifier>");
+			rock.Push ("MP_ASSIGN");
+			rock.Push ("<Expression>");
+		}
+
+		void Rule56(){
+			Console.WriteLine ("Rule 56 used");
+			rock.Push ("MP_IF");
+			rock.Push ("<BooleanExpression>");
+			rock.Push ("MP_THEN");
+			rock.Push ("<Statement>");
+			rock.Push ("<OptionalElsePart>");
+		}
+
+		void Rule57(){
+			Console.WriteLine ("Rule 57 used");
+			rock.Push ("MP_ELSE");
+			rock.Push ("<Statement>");
+		}
+
+		void Rule58(){
+			Console.WriteLine ("Rule 58 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule59(){
+			Console.WriteLine ("Rule 59 used");
+			rock.Push ("MP_REPEAT");
+			rock.Push ("<StatmentSequence>");
+			rock.Push ("MP_Until");
+			rock.Push ("<BooleanExpression>");
+		}
+
+		void Rule60(){
+			Console.WriteLine ("Rule 60 used");
+			rock.Push ("MP_WHILE");
+			rock.Push ("<BooleanExpression>");
+			rock.Push ("MP_DO");
+			rock.Push ("<Statement>");
+		}
+
+		void Rule61(){
+			Console.WriteLine ("Rule 61 used");
+			rock.Push ("MP_FOR");
+			rock.Push ("<ControlVariable>");
+			rock.Push ("MP_ASSIGN");
+			rock.Push ("<InitialValue>");
+			rock.Push ("<StepValue>");
+			rock.Push ("<FinalValue>");
+			rock.Push ("MP_DO");
+			rock.Push ("<Statement>");
+		}
+
+		void Rule62(){
+			Console.WriteLine ("Rule 62 used");
+			rock.Push ("<VariableIdentifier>");
+		}
+
+		void Rule63(){
+			Console.WriteLine ("Rule 63 used");
+			rock.Push ("<OridnalExpression>");
+		}
+
+		void Rule64(){
+			Console.WriteLine ("Rule 64 used");
+			rock.Push ("MP_TO");
+		}
+
+		void Rule65(){
+			Console.WriteLine ("Rule 65 used");
+			rock.Push ("MP_DOWNTO");
+		}
+
+		void Rule66(){
+			Console.WriteLine ("Rule 66 used");
+			rock.Push ("<OridnalExpression>");
+		}
+
+		void Rule67(){
+			Console.WriteLine ("Rule 67 used");
+			rock.Push ("<ProcedureIdentifier>");
+			rock.Push ("<OptionalActualParameterList>");
+		}
+
+		void Rule68(){
+			Console.WriteLine ("Rule 68 used");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("<ActualParameter>");
+			rock.Push ("<ActualParameterTail>");
+			rock.Push ("MP_RPAREN");
+		}
+
+		void Rule69(){
+			Console.WriteLine ("Rule 69 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		//voodoo
+
+		void Rule70(){
+			Console.WriteLine ("Rule 70 used");
+			rock.Push ("MP_COMMA");
+			rock.Push ("<ActualParameter>");
+			rock.Push ("<ActualParameterTail>");
+		}
 	}
 }
 
