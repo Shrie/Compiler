@@ -583,6 +583,194 @@ namespace Compilers
 			rock.Push ("<ProcedureIdentifier");
 			rock.Push ("<OptionalFormalParameterList>");
 		}
+
+		void Rule20(){
+			Console.WriteLine ("Rule 20 used");
+			rock.Push ("MP_FUNCTION");
+			rock.Push ("<FunctionIdentifier>");
+			rock.Push ("<OptionalFormalParameterList>");
+			rock.Push ("MP_COLON");
+			rock.Push ("<Type>");
+		}
+
+		void Rule21(){
+			Console.WriteLine ("Rule 21 used");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("<FormalParameterSection>");
+			rock.Push ("<FormalParameterSectionTail>");
+			rock.Push ("MP_RPAREN");
+		}
+
+		void Rule22(){
+			Console.WriteLine ("Rule 22 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule23(){
+			Console.WriteLine ("Rule 23 used");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<FormalParameterSection>");
+			rock.Push ("<FormalParameterSectionTail>");
+		}
+
+		void Rule24(){
+			Console.WriteLine ("Rule 24 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule25(){
+			Console.WriteLine ("Rule 25 used");
+			rock.Push ("<ValueParameterSerction>");
+		}
+
+		void Rule26(){
+			Console.WriteLine ("Rule 26 used");
+			rock.Push ("<VariableParameterSerction>");
+		}
+
+		void Rule27(){
+			Console.WriteLine ("Rule 27 used");
+			rock.Push ("<IdentifierList>");
+			rock.Push ("MP_COLON");
+			rock.Push ("<Type>");
+		}
+
+		void Rule28(){
+			Console.WriteLine ("Rule 28 used");
+			rock.Push ("MP_VAR");
+			rock.Push ("<IdentifierList>");
+			rock.Push ("MP_COLON");
+			rock.Push ("<Type>");
+		}
+
+		void Rule29(){
+			Console.WriteLine ("Rule 29 used");
+			rock.Push ("<CompoundStatement>");
+		}
+
+		void Rule30(){
+			Console.WriteLine ("Rule 30 used");
+			rock.Push ("MP_BEGIN");
+			rock.Push ("<StatementSequence>");
+			rock.Push ("MP_END");
+		}
+
+		void Rule31(){
+			Console.WriteLine ("Rule 31 used");
+			rock.Push ("<Statement>");
+			rock.Push ("<StatementTail>");
+		}
+
+		void Rule32(){
+			Console.WriteLine ("Rule 32 used");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<Statement>");
+			rock.Push ("<StatementTail>");
+		}
+
+		void Rule33(){
+			Console.WriteLine ("Rule 33 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule34(){
+			Console.WriteLine ("Rule 34 used");
+			rock.Push ("<EmptyStatement>");
+		}
+
+		void Rule35(){
+			Console.WriteLine ("Rule 35 used");
+			rock.Push ("<CompoundStatement>");
+		}
+
+		void Rule36(){
+			Console.WriteLine ("Rule 36 used");
+			rock.Push ("<ReadStatement>");
+		}
+
+		void Rule37(){
+			Console.WriteLine ("Rule 37 used");
+			rock.Push ("<WriteStatement>");
+		}
+
+		void Rule38(){
+			Console.WriteLine ("Rule 38 used");
+			rock.Push ("<AssignmentStatement>");
+		}
+
+		void Rule39(){
+			Console.WriteLine ("Rule 39 used");
+			rock.Push ("<IfStatement>");
+		}
+
+		void Rule40(){
+			Console.WriteLine ("Rule 40 used");
+			rock.Push ("<WhileStatement>");
+		}
+
+		void Rule41(){
+			Console.WriteLine ("Rule 41 used");
+			rock.Push ("<RepeatStatement>");
+		}
+
+		void Rule42(){
+			Console.WriteLine ("Rule 42 used");
+			rock.Push ("<ForStatement>");
+		}
+
+		void Rule43(){
+			Console.WriteLine ("Rule 43 used");
+			rock.Push ("<ForStatement>");
+		}
+
+		void Rule44(){
+			Console.WriteLine ("Rule 44 used");
+			rock.Push ("<ProcedureStatement>");
+		}
+
+		void Rule45(){
+			Console.WriteLine ("Rule 45 used");
+			rock.Push ("MP_READ");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("<ReadParameter>");
+			rock.Push ("<ReadParameterTail>");
+			rock.Push ("MP_RPAREN");
+		}
+
+		void Rule46(){
+			Console.WriteLine ("Rule 46 used");
+			rock.Push ("MP_COMMA");
+			rock.Push ("<ReadParameter>");
+			rock.Push ("<ReadParameterTail>");
+		}
+
+		void Rule47(){
+			Console.WriteLine ("Rule 47 used");
+			rock.Push ("MP_EPSILON");
+		}
+
+		void Rule48(){
+			Console.WriteLine ("Rule 48 used");
+			rock.Push ("<VariableIdentifier>");
+		}
+
+		void Rule49(){
+			Console.WriteLine ("Rule 49 used");
+			rock.Push ("MP_WRITE");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("<WriteParameter>");
+			rock.Push ("<WriteParameterTail>");
+			rock.Push ("MP_RPAREN");
+		}
+
+		void Rule50(){
+			Console.WriteLine ("Rule 50 used");
+			rock.Push ("MP_WRITELN");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("<WriteParameter>");
+			rock.Push ("<WriteParameterTail>");
+			rock.Push ("MP_RPAREN");
+		}
 	}
 }
 
