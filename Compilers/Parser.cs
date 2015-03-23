@@ -404,8 +404,344 @@ namespace Compilers
 						case 2:
 							Rule2();
 							break;
-						default:
-							Console.WriteLine("What the hell did you do!?");
+						case 3:
+							Rule3();
+							break;
+						case 4:
+							Rule4();
+							break;
+						case 5:
+							Rule5();
+							break;
+						case 6:
+							Rule6();
+							break;
+						case 7:
+							Rule7();
+							break;
+						case 8:
+							Rule8();
+							break;
+						case 9:
+							Rule9();
+							break;
+						case 10:
+							Rule10();
+							break;
+						case 11:
+							Rule11();
+							break;
+						case 12:
+							Rule12();
+							break;
+						case 13:
+							Rule13();
+							break;
+						case 14:
+							Rule14();
+							break;
+						case 15:
+							Rule15();
+							break;
+						case 16:
+							Rule16();
+							break;
+						case 17:
+							Rule17();
+							break;
+						case 18:
+							Rule18();
+							break;
+						case 19:
+							Rule19();
+							break;
+						case 20:
+							Rule20();
+							break;
+						case 21:
+							Rule21();
+							break;
+						case 22:
+							Rule22();
+							break;
+						case 23:
+							Rule23();
+							break;
+						case 24:
+							Rule24();
+							break;
+						case 25:
+							Rule25();
+							break;
+						case 26:
+							Rule26();
+							break;
+						case 27:
+							Rule27();
+							break;
+						case 28:
+							Rule28();
+							break;
+						case 29:
+							Rule29();
+							break;
+						case 30:
+							Rule30();
+							break;
+						case 31:
+							Rule31();
+							break;
+						case 32:
+							Rule32();
+							break;
+						case 33:
+							Rule33();
+							break;
+						case 34:
+							Rule34();
+							break;
+						case 35:
+							Rule35();
+							break;
+						case 36:
+							Rule36();
+							break;
+						case 37:
+							Rule37();
+							break;
+						case 38:
+							Rule38();
+							break;
+						case 39:
+							Rule39();
+							break;
+						case 40:
+							Rule40();
+							break;
+						case 41:
+							Rule41();
+							break;
+						case 42:
+							Rule42();
+							break;
+						case 43:
+							Rule43();
+							break;
+						case 44:
+							Rule44();
+							break;
+						case 45:
+							Rule45();
+							break;
+						case 46:
+							Rule46();
+							break;
+						case 47:
+							Rule47();
+							break;
+						case 48:
+							Rule48();
+							break;
+						case 49:
+							Rule49();
+							break;
+						case 50:
+							Rule50();
+							break;
+						case 51:
+							Rule51();
+							break;
+						case 52:
+							Rule52();
+							break;
+						case 53:
+							Rule53();
+							break;
+						case 54:
+							Rule54();
+							break;
+						case 55:
+							Rule55();
+							break;
+						case 56:
+							Rule56();
+							break;
+						case 57:
+							Rule57();
+							break;
+						case 58:
+							Rule58();
+							break;
+						case 59:
+							Rule59();
+							break;
+						case 60:
+							Rule60();
+							break;
+						case 61:
+							Rule61();
+							break;
+						case 62:
+							Rule62();
+							break;
+						case 63:
+							Rule63();
+							break;
+						case 64:
+							Rule64();
+							break;
+						case 65:
+							Rule65();
+							break;
+						case 66:
+							Rule66();
+							break;
+						case 67:
+							Rule67();
+							break;
+						case 68:
+							Rule68();
+							break;
+						case 69:
+							Rule69();
+							break;
+						case 70:
+							Rule70();
+							break;
+						case 71:
+							Rule71();
+							break;
+						case 72:
+							Rule72();
+							break;
+						case 73:
+							Rule73();
+							break;
+						case 74:
+							Rule74();
+							break;
+						case 75:
+							Rule75();
+							break;
+						case 76:
+							Rule76();
+							break;
+						case 77:
+							Rule77();
+							break;
+						case 78:
+							Rule78();
+							break;
+						case 79:
+							Rule79();
+							break;
+						case 80:
+							Rule80();
+							break;
+						case 81:
+							Rule81();
+							break;
+						case 82:
+							Rule82();
+							break;
+						case 83:
+							Rule83();
+							break;
+						case 84:
+							Rule84();
+							break;
+						case 85:
+							Rule85();
+							break;
+						case 86:
+							Rule86();
+							break;
+						case 87:
+							Rule87();
+							break;
+						case 88:
+							Rule88();
+							break;
+						case 89:
+							Rule89();
+							break;
+						case 90:
+							Rule90();
+							break;
+						case 91:
+							Rule91();
+							break;
+						case 92:
+							Rule92();
+							break;
+						case 93:
+							Rule93();
+							break;
+						case 94:
+							Rule94();
+							break;
+						case 95:
+							Rule95();
+							break;
+						case 96:
+							Rule96();
+							break;
+						case 97:
+							Rule97();
+							break;
+						case 98:
+							Rule98();
+							break;
+						case 99:
+							Rule99();
+							break;
+						case 100:
+							Rule100();
+							break;
+						case 101:
+							Rule101();
+							break;
+						case 102:
+							Rule102();
+							break;
+						case 103:
+							Rule103();
+							break;
+						case 104:
+							Rule104();
+							break;
+						case 105:
+							Rule105();
+							break;
+						case 106:
+							Rule106();
+							break;
+						case 107:
+							Rule107();
+							break;
+						case 108:
+							Rule108();
+							break;
+						case 109:
+							Rule109();
+							break;
+						case 110:
+							Rule110();
+							break;
+						case 111:
+							Rule111();
+							break;
+						case 112:
+							Rule112();
+							break;
+						case 113:
+							Rule113();
+							break;
+						case 114:
+							Rule114();
+							break;
+						case 115:
+							Rule115();
 							break;
 						}
 
@@ -536,11 +872,11 @@ namespace Compilers
 			rock.Push ("MP_BOOLEAN");
 		}
 
-		void Rule13(){
-			Console.WriteLine ("Rule 13 used");
-			rock.Push ("<ProcedureDeclaration>");
-			rock.Push ("<ProcedureAndFunctionDeclarationPart>");
-		}
+		//void Rule13(){
+		//	Console.WriteLine ("Rule 13 used");
+		//	rock.Push ("<ProcedureDeclaration>");
+		//	rock.Push ("<ProcedureAndFunctionDeclarationPart>");
+		//}
 
 		void Rule14(){
 			Console.WriteLine ("Rule 14 used");

@@ -11,11 +11,12 @@ namespace Compilers
 			//@"c:\users\Hunter\Desktop\compilers\test1.txt"
 			//@"c:\users\Austo89\Desktop\compilers\test1.txt"
 			//@"/Users/David/Desktop/test1.txt"
-			string contents = File.ReadAllText(@"/Users/David/Desktop/test1.txt");
+			string contents = File.ReadAllText(@"c:\users\Austo89\Desktop\compilers\test1.txt");
 			string output = Scanner.Dispatcher (contents);
 			//.Write(output);
 			Parser testes = new Parser (output);
 			testes.Parse ();
+
 		}
 	}
 }
