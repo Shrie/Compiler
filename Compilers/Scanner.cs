@@ -157,7 +157,7 @@ namespace Compilers
 				}
 			}
 			//append EOF
-			tokenizer.Append ("MP_EOF");
+			tokenizer.Append ("MP_EOF ");
 
 			//move StringBuilder content to output string
 			tokens = tokenizer.ToString ();
@@ -228,7 +228,7 @@ namespace Compilers
 						while (is_id) {
 							//see if the next char is also part of the identifier
 							int comp2 = check.Peek ();
-							if ((comp2 >= 65 && comp2 <= 90) || (comp2 >= 97 && comp2 <= 122) || (comp2 == 95) || (comp2 >= 48 && comp <= 57)) {
+							if ((comp2 >= 65 && comp2 <= 90) || (comp2 >= 97 && comp2 <= 122) || (comp2 == 95) || (comp2 >= 48 && comp2 <= 57)) {
 								//consume the next char
 								id_build.Append ((char)check.Read ());
 								//column_counter++;

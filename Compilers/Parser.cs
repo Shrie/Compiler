@@ -17,9 +17,9 @@ namespace Compilers
 			//initialize StringReader instance
 			tokens = new StringReader (tokens_in);
 
-			//initialize stack with <SystemGoal> and $
-			//$ is the end of parse token
-			rock.Push ("$");
+			//initialize stack with <SystemGoal> and MP_EOF
+			//MP_EOF is the end of parse token
+			rock.Push ("MP_EOF");
 			rock.Push ("<SystemGoal>");
 
 			//fill in the Dictionary using the LL(1) Table
@@ -37,18 +37,24 @@ namespace Compilers
 			lltable.Add ("<ProgramHeading>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
+			inner_dict.Add ("MP_FUNCTION",4);
+			inner_dict.Add ("MP_PROCEDURE",4);
 			inner_dict.Add ("MP_VAR", 4);
-			inner_dict.Add ("MP_EPSILON", 4);
+			inner_dict.Add ("MP_BEGIN", 4);
 			lltable.Add ("<Block>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_VAR", 5);
-			inner_dict.Add ("MP_EPSILON", 6);
+			inner_dict.Add ("MP_FUNCTION",6);
+			inner_dict.Add ("MP_PROCEDURE",6);
+			inner_dict.Add ("MP_BEGIN", 6);
 			lltable.Add ("<VariableDeclarationPart>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_IDENTIFIER", 7);
-			inner_dict.Add ("MP_EPSILON", 8);
+			inner_dict.Add ("MP_BEGIN", 8);
+			inner_dict.Add ("MP_FUNCTION", 8);
+			inner_dict.Add ("MP_PROCEDURE", 8);
 			lltable.Add ("<VariableDeclarationTail>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -65,7 +71,7 @@ namespace Compilers
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PROCEDURE", 14);
 			inner_dict.Add ("MP_FUNCTION", 15);
-			inner_dict.Add ("MP_EPSILON", 16);
+			inner_dict.Add ("MP_BEGIN", 16);
 			lltable.Add ("<ProcedureAndFunctionDeclarationPart>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -86,12 +92,13 @@ namespace Compilers
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_LPAREN", 21);
-			inner_dict.Add ("MP_EPSILON", 22);
+			inner_dict.Add ("MP_SCOLON", 22);
+			inner_dict.Add ("MP_COLON", 22);
 			lltable.Add ("<OptionalFormalParameterList>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_SCOLON", 23);
-			inner_dict.Add ("MP_EPSILON", 24);
+			inner_dict.Add ("MP_RPAREN", 24);
 			lltable.Add ("<FormalParameterSectionTail>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -125,15 +132,16 @@ namespace Compilers
 			inner_dict.Add ("MP_IF", 31);
 			inner_dict.Add ("MP_REPEAT", 31);
 			inner_dict.Add ("MP_WHILE", 31);
-			inner_dict.Add ("MP_FOR", 31);
-			inner_dict.Add ("MP_EPSILON", 31);
+			inner_dict.Add ("MP_FOR", 31);;
 			lltable.Add ("<StatementSequence>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_SCOLON", 32);
-			inner_dict.Add ("MP_EPSILON", 33);
+			inner_dict.Add ("MP_END", 33);
+			inner_dict.Add ("MP_UNTIL",33);
 			lltable.Add ("<StatementTail>", inner_dict);
 
+			//add in functionality for procedure statement
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_BEGIN", 35);
 			inner_dict.Add ("MP_IDENTIFIER", 38);
@@ -144,17 +152,18 @@ namespace Compilers
 			inner_dict.Add ("MP_REPEAT", 41);
 			inner_dict.Add ("MP_WHILE", 40);
 			inner_dict.Add ("MP_FOR", 42);
-			inner_dict.Add ("MP_EPSILON", 34);
+			inner_dict.Add ("MP_ELSE", 34);
+			inner_dict.Add ("MP_END", 34);
+			inner_dict.Add ("MP_UNTIL", 34);
+			inner_dict.Add ("MP_SCOLON", 34);
+			inner_dict.Add ("MP_PROCEDURE", 43);
 			lltable.Add ("<Statement>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_LPAREN", 54);
-			inner_dict.Add ("MP_ASSIGN", 43);
-			inner_dict.Add ("MP_EPSILON", 54);
-			lltable.Add ("<AssignmentProcedureStatement>", inner_dict);
-
-			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_EPSILON", 44);
+			inner_dict.Add ("MP_ELSE", 44);
+			inner_dict.Add ("MP_END", 44);
+			inner_dict.Add ("MP_UNTIL", 44);
+			inner_dict.Add ("MP_SCOLON", 44);
 			lltable.Add ("<EmptyStatement>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -163,7 +172,7 @@ namespace Compilers
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_COMMA", 46);
-			inner_dict.Add ("MP_EPSILON", 47);
+			inner_dict.Add ("MP_RPAREN", 47);
 			lltable.Add ("<ReadParameterTail>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -177,14 +186,24 @@ namespace Compilers
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_COMMA", 51);
-			inner_dict.Add ("MP_EPSILON", 52);
+			inner_dict.Add ("MP_RPAREN", 52);
 			lltable.Add ("<WriteParameterTail>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PLUS", 53);
 			inner_dict.Add ("MP_MINUS", 53);
-			inner_dict.Add ("MP_EPSILON", 53);
+			inner_dict.Add ("MP_FALSE", 53);
+			inner_dict.Add ("MP_NOT", 53);
+			inner_dict.Add ("MP_TRUE", 53);
+			inner_dict.Add ("MP_INTEGER_LIT", 53);
+			inner_dict.Add ("MP_STRING_LIT", 53);
+			inner_dict.Add ("MP_FLOAT_LIT", 53);
+			inner_dict.Add ("MP_LPAREN", 53);
 			lltable.Add ("<WriteParameter>", inner_dict);
+
+			inner_dict = new Dictionary<string,int> ();
+			inner_dict.Add ("MP_IDENTIFIER", 54);
+			lltable.Add ("<AssignmentStatement>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_IF", 56);
@@ -192,7 +211,9 @@ namespace Compilers
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_ELSE", 57);
-			inner_dict.Add ("MP_EPSILON", 58);
+			inner_dict.Add ("MP_END", 58);
+			inner_dict.Add ("MP_SCOLON", 58);
+			inner_dict.Add ("MP_UNTIL", 58);
 			lltable.Add ("<OptionalElsePart>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -214,7 +235,14 @@ namespace Compilers
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PLUS", 63);
 			inner_dict.Add ("MP_MINUS", 63);
-			inner_dict.Add ("MP_EPSILON", 63);
+			inner_dict.Add ("MP_FALSE", 63);
+			inner_dict.Add ("MP_NOT", 63);
+			inner_dict.Add ("MP_TRUE", 63);
+			inner_dict.Add ("MP_IDENTIFIER", 63);
+			inner_dict.Add ("MP_INTEGER_LIT", 63);
+			inner_dict.Add ("MP_FLOAT_LIT", 63);
+			inner_dict.Add ("MP_STRING_LIT", 63);
+			inner_dict.Add ("MP_LPAREN", 63);
 			lltable.Add ("<InitialValue>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -225,34 +253,57 @@ namespace Compilers
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PLUS", 66);
 			inner_dict.Add ("MP_MINUS", 66);
-			inner_dict.Add ("MP_EPSILON", 66);
+			inner_dict.Add ("MP_FALSE", 66);
+			inner_dict.Add ("MP_NOT", 66);
+			inner_dict.Add ("MP_TRUE", 66);
+			inner_dict.Add ("MP_IDENTIFIER", 66);
+			inner_dict.Add ("MP_INTEGER_LIT", 66);
+			inner_dict.Add ("MP_FLOAT_LIT", 66);
+			inner_dict.Add ("MP_STRING_LIT", 66);
+			inner_dict.Add ("MP_LPAREN", 66);
 			lltable.Add ("<FinalValue>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_EPLISON", 67);
-			inner_dict.Add ("MP_EPSILON", 67);
+			inner_dict.Add ("MP_IDENTIFIER", 67);
 			lltable.Add ("<ProcedureStatement>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_LPAREN", 68);
-			inner_dict.Add ("MP_EPSILON", 69);
+			inner_dict.Add ("MP_ELSE", 69);
+			inner_dict.Add ("MP_END", 69);
+			inner_dict.Add ("MP_UNTIL", 69);
+			inner_dict.Add ("MP_SCOLON", 69);
 			lltable.Add ("<OptionalActualParameterList>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_COMMA", 70);
-			inner_dict.Add ("MP_EPSILON", 71);
+			inner_dict.Add ("MP_RPAREN", 71);
 			lltable.Add ("<ActualParameterTail>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PLUS", 72);
 			inner_dict.Add ("MP_MINUS", 72);
-			inner_dict.Add ("MP_EPSILON", 72);
+			inner_dict.Add ("MP_FALSE", 72);
+			inner_dict.Add ("MP_NOT", 72);
+			inner_dict.Add ("MP_TRUE", 72);
+			inner_dict.Add ("MP_IDENTIFIER", 72);
+			inner_dict.Add ("MP_INTEGER_LIT", 72);
+			inner_dict.Add ("MP_FLOAT_LIT", 72);
+			inner_dict.Add ("MP_STRING_LIT", 72);
+			inner_dict.Add ("MP_LPAREN", 72);
 			lltable.Add ("<ActualParameter>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PLUS", 73);
 			inner_dict.Add ("MP_MINUS", 73);
-			inner_dict.Add ("MP_EPSILON", 73);
+			inner_dict.Add ("MP_FALSE", 73);
+			inner_dict.Add ("MP_NOT", 73);
+			inner_dict.Add ("MP_TRUE", 73);
+			inner_dict.Add ("MP_IDENTIFIER", 73);
+			inner_dict.Add ("MP_INTEGER_LIT", 73);
+			inner_dict.Add ("MP_FLOAT_LIT", 73);
+			inner_dict.Add ("MP_STRING_LIT", 73);
+			inner_dict.Add ("MP_LPAREN", 73);
 			lltable.Add ("<Expression>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -262,7 +313,17 @@ namespace Compilers
 			inner_dict.Add ("MP_GEQUAL", 74);
 			inner_dict.Add ("MP_LEQUAL", 74);
 			inner_dict.Add ("MP_NEQUAL", 74);
-			inner_dict.Add ("MP_EPSILON", 75);
+			inner_dict.Add ("MP_DO", 75);
+			inner_dict.Add ("MP_DOWNTO", 75);
+			inner_dict.Add ("MP_ELSE", 75);
+			inner_dict.Add ("MP_END", 75);
+			inner_dict.Add ("MP_THEN", 75);
+			inner_dict.Add ("MP_TO", 75);
+			inner_dict.Add ("MP_UNTIL", 75);
+			inner_dict.Add ("MP_COMMA", 75);
+			inner_dict.Add ("MP_SCOLON", 75);
+			inner_dict.Add ("MP_LPAREN", 75);
+			inner_dict.Add ("MP_RPAREN", 75);
 			lltable.Add ("<OptionalRelationalPart>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -277,20 +338,49 @@ namespace Compilers
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PLUS", 82);
 			inner_dict.Add ("MP_MINUS", 82);
-			inner_dict.Add ("MP_EPSILON", 82);
+			inner_dict.Add ("MP_FALSE", 82);
+			inner_dict.Add ("MP_NOT", 82);
+			inner_dict.Add ("MP_TRUE", 82);
+			inner_dict.Add ("MP_IDENTIFIER", 82);
+			inner_dict.Add ("MP_INTEGER_LIT", 82);
+			inner_dict.Add ("MP_FLOAT_LIT", 82);
+			inner_dict.Add ("MP_STRING_LIT", 82);
+			inner_dict.Add ("MP_LPAREN", 82);
 			lltable.Add ("<SimpleExpression>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PLUS", 83);
 			inner_dict.Add ("MP_MINUS", 83);
 			inner_dict.Add ("MP_OR", 83);
-			inner_dict.Add ("MP_EPSILON", 84);
+			inner_dict.Add ("MP_DO", 84);
+			inner_dict.Add ("MP_DOWNTO", 84);
+			inner_dict.Add ("MP_ELSE", 84);
+			inner_dict.Add ("MP_END", 84);
+			inner_dict.Add ("MP_THEN", 84);
+			inner_dict.Add ("MP_TO", 84);
+			inner_dict.Add ("MP_UNTIL", 84);
+			inner_dict.Add ("MP_COMMA", 84);
+			inner_dict.Add ("MP_SCOLON", 84);
+			inner_dict.Add ("MP_RPAREN", 84);
+			inner_dict.Add ("MP_EQUAL", 84);
+			inner_dict.Add ("MP_LEQUAL", 84);
+			inner_dict.Add ("MP_GEQUAL", 84);
+			inner_dict.Add ("MP_LTHAN", 84);
+			inner_dict.Add ("MP_GTHAN", 84);
+			inner_dict.Add ("MP_NEQUAL", 84);
 			lltable.Add ("<TermTail>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_PLUS", 85);
 			inner_dict.Add ("MP_MINUS", 86);
-			inner_dict.Add ("MP_EPSILON", 87);
+			inner_dict.Add ("MP_FALSE", 87);
+			inner_dict.Add ("MP_NOT", 87);
+			inner_dict.Add ("MP_TRUE", 87);
+			inner_dict.Add ("MP_IDENTIFIER", 87);
+			inner_dict.Add ("MP_INTEGER_LIT", 87);
+			inner_dict.Add ("MP_STRING_LIT", 87);
+			inner_dict.Add ("MP_FLOAT_LIT", 87);
+			inner_dict.Add ("MP_LPAREN", 87);
 			lltable.Add ("<OptionalSign>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -316,7 +406,25 @@ namespace Compilers
 			inner_dict.Add ("MP_DIV", 92);
 			inner_dict.Add ("MP_MOD", 92);
 			inner_dict.Add ("MP_AND", 92);
-			inner_dict.Add ("MP_EPSILON", 93);
+			inner_dict.Add ("MP_DO", 93);
+			inner_dict.Add ("MP_DOWNTO", 93);
+			inner_dict.Add ("MP_ELSE", 93);
+			inner_dict.Add ("MP_END", 93);
+			inner_dict.Add ("MP_OR", 93);
+			inner_dict.Add ("MP_THEN", 93);
+			inner_dict.Add ("MP_TO", 93);
+			inner_dict.Add ("MP_UNTIL", 93);
+			inner_dict.Add ("MP_COMMA", 93);
+			inner_dict.Add ("MP_SCOLON", 93);
+			inner_dict.Add ("MP_RPAREN", 93);
+			inner_dict.Add ("MP_EQUAL", 93);
+			inner_dict.Add ("MP_LEQUAL", 93);
+			inner_dict.Add ("MP_GEQUAL", 93);
+			inner_dict.Add ("MP_LTHAN", 93);
+			inner_dict.Add ("MP_GTHAN", 93);
+			inner_dict.Add ("MP_NEQUAL", 93);
+			inner_dict.Add ("MP_PLUS", 93);
+			inner_dict.Add ("MP_MINUS", 93);
 			lltable.Add ("<FactorTail>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
@@ -329,7 +437,7 @@ namespace Compilers
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_LPAREN", 105);
-			inner_dict.Add ("MP_IDENTIFIER", 106);
+			inner_dict.Add ("MP_IDENTIFIER", 116);
 			inner_dict.Add ("MP_INTEGER_LIT", 99);
 			inner_dict.Add ("MP_FLOAT_LIT", 100);
 			inner_dict.Add ("MP_STRING_LIT", 101);
@@ -344,37 +452,63 @@ namespace Compilers
 
 			inner_dict = new Dictionary<string,int> ();
 			inner_dict.Add ("MP_IDENTIFIER", 108);
+			lltable.Add ("<VariableIdentifier>", inner_dict);
+
+			inner_dict = new Dictionary<string,int> ();
+			inner_dict.Add ("MP_IDENTIFIER", 109);
 			lltable.Add ("<ProcedureIdentifier>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_PLUS", 109);
-			inner_dict.Add ("MP_MINUS", 109);
-			inner_dict.Add ("MP_EPSILON", 109);
-			lltable.Add ("<BooleanExpression>", inner_dict);
-
-			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_PLUS", 110);
-			inner_dict.Add ("MP_MINUS", 110);
-			inner_dict.Add ("MP_EPSILON", 110);
-			lltable.Add ("<OrdinalExpression>", inner_dict);
-
-			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_IDENTIFIER", 111);
-			lltable.Add ("<IdentifierList>", inner_dict);
-
-			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_COMMA", 112);
-			inner_dict.Add ("MP_EPSILON", 113);
-			lltable.Add ("<IdentifierTail>", inner_dict);
-
-			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_IDENTIFIER", 115);
+			inner_dict.Add ("MP_IDENTIFIER", 110);
 			lltable.Add ("<FunctionIdentifier>", inner_dict);
 
 			inner_dict = new Dictionary<string,int> ();
-			inner_dict.Add ("MP_IDENTIFIER", 116);
-			lltable.Add ("<VariableIdentifier>", inner_dict);
+			inner_dict.Add ("MP_FALSE", 111);
+			inner_dict.Add ("MP_NOT", 111);
+			inner_dict.Add ("MP_TRUE", 111);
+			inner_dict.Add ("MP_IDENTIFIER", 111);
+			inner_dict.Add ("MP_INTEGER_LIT", 111);
+			inner_dict.Add ("MP_STRING_LIT", 111);
+			inner_dict.Add ("MP_FLOAT_LIT", 111);
+			inner_dict.Add ("MP_LPAREN", 111);
+			inner_dict.Add ("MP_PLUS", 111);
+			inner_dict.Add ("MP_MINUS", 111);
+			lltable.Add ("<BooleanExpression>", inner_dict);
 
+			inner_dict = new Dictionary<string,int> ();
+			inner_dict.Add ("MP_FALSE", 112);
+			inner_dict.Add ("MP_NOT", 112);
+			inner_dict.Add ("MP_TRUE", 112);
+			inner_dict.Add ("MP_IDENTIFIER", 112);
+			inner_dict.Add ("MP_INTEGER_LIT", 112);
+			inner_dict.Add ("MP_STRING_LIT", 112);
+			inner_dict.Add ("MP_FLOAT_LIT", 112);
+			inner_dict.Add ("MP_LPAREN", 112);
+			inner_dict.Add ("MP_PLUS", 112);
+			inner_dict.Add ("MP_MINUS", 112);
+			lltable.Add ("<OrdinalExpression>", inner_dict);
+
+			inner_dict = new Dictionary<string,int> ();
+			inner_dict.Add ("MP_IDENTIFIER", 113);
+			lltable.Add ("<IdentifierList>", inner_dict);
+
+			inner_dict = new Dictionary<string,int> ();
+			inner_dict.Add ("MP_COMMA", 114);
+			inner_dict.Add ("MP_COLON", 115);
+			lltable.Add ("<IdentifierTail>", inner_dict);
+
+			inner_dict = new Dictionary<string,int> ();
+			inner_dict.Add ("MP_IDENTIFIER", 117);
+			lltable.Add ("<AssignProcedureStatement>", inner_dict);
+
+			inner_dict = new Dictionary<string,int> ();
+			inner_dict.Add ("MP_ASSIGN", 118);
+			inner_dict.Add ("MP_LPAREN", 119);
+			inner_dict.Add ("MP_ELSE", 119);
+			inner_dict.Add ("MP_END", 119);
+			inner_dict.Add ("MP_UNTIL", 119);
+			inner_dict.Add ("MP_SCOLON", 119);
+			lltable.Add ("<AssignProcedureTail>", inner_dict);
 		}
 
 
@@ -387,10 +521,13 @@ namespace Compilers
 			while(continueParse){
 
 				nextStackToken = StackPeek ();
-
-				if (nextStackToken == nextToken) {
+				if (nextToken == "MP_EOF" || nextStackToken == "MP_EOF") {
+					continueParse = false;
+				} else if (nextStackToken == nextToken) {
+					Console.WriteLine (nextToken);
+					Console.WriteLine (nextStackToken);
 					nextToken = Peek ();
-					nextStackToken = StackPeek ();
+					//nextStackToken = StackPeek ();
 				} else {
 					try{
 						Dictionary<string, int> inside = lltable[nextStackToken];
@@ -743,18 +880,30 @@ namespace Compilers
 						case 115:
 							Rule115();
 							break;
+						case 116:
+							Rule116();
+							break;
+						case 117:
+							Rule117();
+							break;
+						case 118:
+							Rule118();
+							break;
+						case 119:
+							Rule119();
+							break;
 						}
 
 					}catch(KeyNotFoundException){
-						Console.WriteLine ("Syntax Error.");
+						Console.Write ("Syntax Error.");
+						Console.WriteLine (nextStackToken);
+						Console.WriteLine (nextToken);
 					}
 				}
 
 
 
-				if (nextStackToken == "$") {
-					continueParse = false;
-				}
+
 			}
 		}
 
@@ -794,7 +943,7 @@ namespace Compilers
 		//of the grammar rule onto the stack from right to left.
 		void Rule1(){
 			Console.WriteLine ("Rule 1 used");
-			rock.Push ("MP_EOF");
+			//rock.Push ("MP_EOF");
 			rock.Push ("<Program>");
 		}
 
@@ -808,48 +957,47 @@ namespace Compilers
 
 		void Rule3(){
 			Console.WriteLine ("Rule 3 used");
-			rock.Push ("MP_PROGRAM");
 			rock.Push ("<ProgramIdentifier>");
-		
+			rock.Push ("MP_PROGRAM");
 		}
 
 		void Rule4(){
 			Console.WriteLine ("Rule 4 used");
-			rock.Push ("<VariableDeclarationPart>");
-			rock.Push ("<ProcedureAndFunctionDeclationPart>");
 			rock.Push ("<StatementPart>");
+			rock.Push ("<ProcedureAndFunctionDeclarationPart>");
+			rock.Push ("<VariableDeclarationPart>");
 		}
 
 		void Rule5(){
 			Console.WriteLine ("Rule 5 used");
-			rock.Push ("MP_VAR");
-			rock.Push ("<VariableDeclaration>");
+			rock.Push ("<VariableDeclarationTail>");
 			rock.Push ("MP_SCOLON");
-			rock.Push ("<VariableDeclarationTail>");		
+			rock.Push ("<VariableDeclaration>");
+			rock.Push ("MP_VAR");
 		}
 
 		void Rule6(){
 			Console.WriteLine ("Rule 6 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule7(){
 			Console.WriteLine ("Rule 7 used");
-			rock.Push ("<VariableDeclaration>");
-			rock.Push ("MP_SCOLON");
 			rock.Push ("<VariableDeclarationTail>");
+			rock.Push ("MP_SCOLON");
+			rock.Push ("<VariableDeclaration>");
 		}
 
 		void Rule8(){
 			Console.WriteLine ("Rule 8 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule9(){
 			Console.WriteLine ("Rule 9 used");
-			rock.Push ("<IdentifierList>");
-			rock.Push ("MP_COLON");
 			rock.Push ("<Type>");
+			rock.Push ("MP_COLON");
+			rock.Push ("<IdentifierList>");
 		}
 
 		void Rule10(){
@@ -872,86 +1020,78 @@ namespace Compilers
 			rock.Push ("MP_BOOLEAN");
 		}
 
-		//void Rule13(){
-		//	Console.WriteLine ("Rule 13 used");
-		//	rock.Push ("<ProcedureDeclaration>");
-		//	rock.Push ("<ProcedureAndFunctionDeclarationPart>");
-		//}
-
 		void Rule14(){
 			Console.WriteLine ("Rule 14 used");
-			rock.Push ("<FunctionDeclaration>");
 			rock.Push ("<ProcedureAndFunctionDeclarationPart>");
+			rock.Push ("<ProcedureDeclaration>");
 		}
 
 		void Rule15(){
 			Console.WriteLine ("Rule 15 used");
-			rock.Push ("MP_EPSILON");
+			rock.Push ("<ProcedureAndFunctionDeclarationPart>");
+			rock.Push ("<FunctionDeclaration>");
 		}
 
 		void Rule16(){
 			Console.WriteLine ("Rule 16 used");
-			rock.Push ("<ProcedureHeading>");
-			rock.Push ("MP_SCOLON");
-			rock.Push ("<Block>");
-			rock.Push ("MP_SCOLON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule17(){
 			Console.WriteLine ("Rule 17 used");
-			rock.Push ("<FunctionHeading>");
 			rock.Push ("MP_SCOLON");
 			rock.Push ("<Block>");
 			rock.Push ("MP_SCOLON");
+			rock.Push ("<ProcedureHeading>");
 		}
 
 		void Rule18(){
 			Console.WriteLine ("Rule 18 used");
-			rock.Push ("<ProcedureHeading>");
 			rock.Push ("MP_SCOLON");
 			rock.Push ("<Block>");
 			rock.Push ("MP_SCOLON");
+			rock.Push ("<FunctionHeading>");
 		}
 
 		void Rule19(){
 			Console.WriteLine ("Rule 19 used");
-			rock.Push ("MP_PROCEDURE");
-			rock.Push ("<ProcedureIdentifier");
 			rock.Push ("<OptionalFormalParameterList>");
+			rock.Push ("<ProcedureIdentifier");
+			rock.Push ("MP_PROCEDURE");
 		}
 
 		void Rule20(){
 			Console.WriteLine ("Rule 20 used");
-			rock.Push ("MP_FUNCTION");
-			rock.Push ("<FunctionIdentifier>");
-			rock.Push ("<OptionalFormalParameterList>");
-			rock.Push ("MP_COLON");
 			rock.Push ("<Type>");
+			rock.Push ("MP_COLON");
+			rock.Push ("<OptionalFormalParameterList>");
+			rock.Push ("<FunctionIdentifier>");
+			rock.Push ("MP_FUNCTION");
 		}
 
 		void Rule21(){
 			Console.WriteLine ("Rule 21 used");
-			rock.Push ("MP_LPAREN");
-			rock.Push ("<FormalParameterSection>");
-			rock.Push ("<FormalParameterSectionTail>");
 			rock.Push ("MP_RPAREN");
+			rock.Push ("<FormalParameterSectionTail>");
+			rock.Push ("<FormalParameterSection>");
+			rock.Push ("MP_LPAREN");
 		}
 
 		void Rule22(){
 			Console.WriteLine ("Rule 22 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule23(){
 			Console.WriteLine ("Rule 23 used");
-			rock.Push ("MP_SCOLON");
-			rock.Push ("<FormalParameterSection>");
 			rock.Push ("<FormalParameterSectionTail>");
+			rock.Push ("<FormalParameterSection>");
+			rock.Push ("MP_SCOLON");
 		}
 
 		void Rule24(){
 			Console.WriteLine ("Rule 24 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule25(){
@@ -966,17 +1106,17 @@ namespace Compilers
 
 		void Rule27(){
 			Console.WriteLine ("Rule 27 used");
-			rock.Push ("<IdentifierList>");
-			rock.Push ("MP_COLON");
 			rock.Push ("<Type>");
+			rock.Push ("MP_COLON");
+			rock.Push ("<IdentifierList>");
 		}
 
 		void Rule28(){
 			Console.WriteLine ("Rule 28 used");
-			rock.Push ("MP_VAR");
-			rock.Push ("<IdentifierList>");
-			rock.Push ("MP_COLON");
 			rock.Push ("<Type>");
+			rock.Push ("MP_COLON");
+			rock.Push ("<IdentifierList>");
+			rock.Push ("MP_VAR");
 		}
 
 		void Rule29(){
@@ -986,27 +1126,27 @@ namespace Compilers
 
 		void Rule30(){
 			Console.WriteLine ("Rule 30 used");
-			rock.Push ("MP_BEGIN");
-			rock.Push ("<StatementSequence>");
 			rock.Push ("MP_END");
+			rock.Push ("<StatementSequence>");
+			rock.Push ("MP_BEGIN");
 		}
 
 		void Rule31(){
 			Console.WriteLine ("Rule 31 used");
-			rock.Push ("<Statement>");
 			rock.Push ("<StatementTail>");
+			rock.Push ("<Statement>");
 		}
 
 		void Rule32(){
 			Console.WriteLine ("Rule 32 used");
-			rock.Push ("MP_SCOLON");
-			rock.Push ("<Statement>");
 			rock.Push ("<StatementTail>");
+			rock.Push ("<Statement>");
+			rock.Push ("MP_SCOLON");
 		}
 
 		void Rule33(){
 			Console.WriteLine ("Rule 33 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule34(){
@@ -1031,7 +1171,7 @@ namespace Compilers
 
 		void Rule38(){
 			Console.WriteLine ("Rule 38 used");
-			rock.Push ("<AssignmentStatement>");
+			rock.Push ("<AssignProcedureStatement>");
 		}
 
 		void Rule39(){
@@ -1061,28 +1201,27 @@ namespace Compilers
 
 		void Rule44(){
 			Console.WriteLine ("Rule 44 used");
-			rock.Push ("<ProcedureStatement>");
 		}
 
 		void Rule45(){
 			Console.WriteLine ("Rule 45 used");
-			rock.Push ("MP_READ");
-			rock.Push ("MP_LPAREN");
-			rock.Push ("<ReadParameter>");
-			rock.Push ("<ReadParameterTail>");
 			rock.Push ("MP_RPAREN");
+			rock.Push ("<ReadParameterTail>");
+			rock.Push ("<ReadParameter>");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("MP_READ");
 		}
 
 		void Rule46(){
 			Console.WriteLine ("Rule 46 used");
-			rock.Push ("MP_COMMA");
-			rock.Push ("<ReadParameter>");
 			rock.Push ("<ReadParameterTail>");
+			rock.Push ("<ReadParameter>");
+			rock.Push ("MP_COMMA");
 		}
 
 		void Rule47(){
 			Console.WriteLine ("Rule 47 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule48(){
@@ -1092,32 +1231,32 @@ namespace Compilers
 
 		void Rule49(){
 			Console.WriteLine ("Rule 49 used");
-			rock.Push ("MP_WRITE");
-			rock.Push ("MP_LPAREN");
-			rock.Push ("<WriteParameter>");
-			rock.Push ("<WriteParameterTail>");
 			rock.Push ("MP_RPAREN");
+			rock.Push ("<WriteParameterTail>");
+			rock.Push ("<WriteParameter>");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("MP_WRITE");
 		}
 
 		void Rule50(){
 			Console.WriteLine ("Rule 50 used");
-			rock.Push ("MP_WRITELN");
-			rock.Push ("MP_LPAREN");
-			rock.Push ("<WriteParameter>");
-			rock.Push ("<WriteParameterTail>");
 			rock.Push ("MP_RPAREN");
+			rock.Push ("<WriteParameterTail>");
+			rock.Push ("<WriteParameter>");
+			rock.Push ("MP_LPAREN");
+			rock.Push ("MP_WRITELN");
 		}
 
 		void Rule51(){
 			Console.WriteLine ("Rule 51 used");
-			rock.Push ("MP_COMMA");
-			rock.Push ("<WriteParameter>");
 			rock.Push ("<WriteParameterTail>");
+			rock.Push ("<WriteParameter>");
+			rock.Push ("MP_COMMA");
 		}
 
 		void Rule52(){
 			Console.WriteLine ("Rule 52 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule53(){
@@ -1127,64 +1266,64 @@ namespace Compilers
 
 		void Rule54(){
 			Console.WriteLine ("Rule 54 used");
-			rock.Push ("<VariableIdentifier>");
-			rock.Push ("MP_ASSIGN");
 			rock.Push ("<Expression>");
+			rock.Push ("MP_ASSIGN");
+			rock.Push ("<VariableIdentifier>");
 		}
 
 		void Rule55(){
 			Console.WriteLine ("Rule 55 used");
-			rock.Push ("<FunctionIdentifier>");
-			rock.Push ("MP_ASSIGN");
 			rock.Push ("<Expression>");
+			rock.Push ("MP_ASSIGN");
+			rock.Push ("<FunctionIdentifier>");
 		}
 
 		void Rule56(){
 			Console.WriteLine ("Rule 56 used");
-			rock.Push ("MP_IF");
-			rock.Push ("<BooleanExpression>");
-			rock.Push ("MP_THEN");
-			rock.Push ("<Statement>");
 			rock.Push ("<OptionalElsePart>");
+			rock.Push ("<Statement>");
+			rock.Push ("MP_THEN");
+			rock.Push ("<BooleanExpression>");
+			rock.Push ("MP_IF");
 		}
 
 		void Rule57(){
 			Console.WriteLine ("Rule 57 used");
-			rock.Push ("MP_ELSE");
 			rock.Push ("<Statement>");
+			rock.Push ("MP_ELSE");
 		}
 
 		void Rule58(){
 			Console.WriteLine ("Rule 58 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule59(){
 			Console.WriteLine ("Rule 59 used");
-			rock.Push ("MP_REPEAT");
-			rock.Push ("<StatmentSequence>");
-			rock.Push ("MP_Until");
 			rock.Push ("<BooleanExpression>");
+			rock.Push ("MP_Until");
+			rock.Push ("<StatementSequence>");
+			rock.Push ("MP_REPEAT");
 		}
 
 		void Rule60(){
 			Console.WriteLine ("Rule 60 used");
-			rock.Push ("MP_WHILE");
-			rock.Push ("<BooleanExpression>");
-			rock.Push ("MP_DO");
 			rock.Push ("<Statement>");
+			rock.Push ("MP_DO");
+			rock.Push ("<BooleanExpression>");
+			rock.Push ("MP_WHILE");
 		}
 
 		void Rule61(){
 			Console.WriteLine ("Rule 61 used");
-			rock.Push ("MP_FOR");
-			rock.Push ("<ControlVariable>");
-			rock.Push ("MP_ASSIGN");
-			rock.Push ("<InitialValue>");
-			rock.Push ("<StepValue>");
-			rock.Push ("<FinalValue>");
-			rock.Push ("MP_DO");
 			rock.Push ("<Statement>");
+			rock.Push ("MP_DO");
+			rock.Push ("<FinalValue>");
+			rock.Push ("<StepValue>");
+			rock.Push ("<InitialValue>");
+			rock.Push ("MP_ASSIGN");
+			rock.Push ("<ControlVariable>");
+			rock.Push ("MP_FOR");
 		}
 
 		void Rule62(){
@@ -1194,7 +1333,7 @@ namespace Compilers
 
 		void Rule63(){
 			Console.WriteLine ("Rule 63 used");
-			rock.Push ("<OridnalExpression>");
+			rock.Push ("<OrdinalExpression>");
 		}
 
 		void Rule64(){
@@ -1209,62 +1348,62 @@ namespace Compilers
 
 		void Rule66(){
 			Console.WriteLine ("Rule 66 used");
-			rock.Push ("<OridnalExpression>");
+			rock.Push ("<OrdinalExpression>");
 		}
 
 		void Rule67(){
 			Console.WriteLine ("Rule 67 used");
-			rock.Push ("<ProcedureIdentifier>");
 			rock.Push ("<OptionalActualParameterList>");
+			rock.Push ("<ProcedureIdentifier>");
 		}
 
 		void Rule68(){
 			Console.WriteLine ("Rule 68 used");
-			rock.Push ("MP_LPAREN");
-			rock.Push ("<ActualParameter>");
-			rock.Push ("<ActualParameterTail>");
 			rock.Push ("MP_RPAREN");
+			rock.Push ("<ActualParameterTail>");
+			rock.Push ("<ActualParameter>");
+			rock.Push ("MP_LPAREN");
 		}
 
 		void Rule69(){
 			Console.WriteLine ("Rule 69 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		//voodoo
 
 		void Rule70(){
 			Console.WriteLine ("Rule 70 used");
-			rock.Push ("MP_COMMA");
-			rock.Push ("<ActualParameter>");
 			rock.Push ("<ActualParameterTail>");
+			rock.Push ("<ActualParameter>");
+			rock.Push ("MP_COMMA");
 		}
 
 		void Rule71(){
 			Console.WriteLine ("Rule 71 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule72(){
 			Console.WriteLine ("Rule 72 used");
-			rock.Push ("<OridnalExpression>");
+			rock.Push ("<OrdinalExpression>");
 		}
 
 		void Rule73(){
 			Console.WriteLine ("Rule 73 used");
-			rock.Push ("<SimpleExpression>");
 			rock.Push ("<OptionalRelationalPart>");
+			rock.Push ("<SimpleExpression>");
 		}
 
 		void Rule74(){
 			Console.WriteLine ("Rule 74 used");
 			rock.Push ("<SimpleExpression>");
-			rock.Push ("<OptionalRelationalPart>");
+			rock.Push ("<RelationalOperator>");
 		}
 
 		void Rule75(){
 			Console.WriteLine ("Rule 75 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule76(){
@@ -1299,21 +1438,21 @@ namespace Compilers
 
 		void Rule82(){
 			Console.WriteLine ("Rule 82 used");
-			rock.Push ("<OptionalSign>");
-			rock.Push ("<Term>");
 			rock.Push ("<TermTail>");
+			rock.Push ("<Term>");
+			rock.Push ("<OptionalSign>");
 		}
 
 		void Rule83(){
 			Console.WriteLine ("Rule 83 used");
-			rock.Push ("<AddingOperator>");
-			rock.Push ("<Term>");
 			rock.Push ("<TermTail>");
+			rock.Push ("<Term>");
+			rock.Push ("<AddingOperator>");
 		}
 
 		void Rule84(){
 			Console.WriteLine ("Rule 84 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule85(){
@@ -1328,7 +1467,7 @@ namespace Compilers
 
 		void Rule87(){
 			Console.WriteLine ("Rule 87 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule88(){
@@ -1348,20 +1487,20 @@ namespace Compilers
 
 		void Rule91(){
 			Console.WriteLine ("Rule 91 used");
-			rock.Push ("<Factor>");
 			rock.Push ("<FactorTail>");
+			rock.Push ("<Factor>");
 		}
 
 		void Rule92(){
 			Console.WriteLine ("Rule 92 used");
-			rock.Push ("<MultiplyingOperator>");
-			rock.Push ("<Factor>");
 			rock.Push ("<FactorTail>");
+			rock.Push ("<Factor>");
+			rock.Push ("<MultiplyingOperator>");
 		}
 
 		void Rule93(){
 			Console.WriteLine ("Rule 93 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
 		}
 
 		void Rule94(){
@@ -1391,17 +1530,17 @@ namespace Compilers
 
 		void Rule99(){
 			Console.WriteLine ("Rule 99 used");
-			rock.Push ("<UnsignedInteger>");
+			rock.Push ("MP_INTEGER_LIT");
 		}
 
 		void Rule100(){
 			Console.WriteLine ("Rule 100 used");
-			rock.Push ("<UnsignedFloat>");
+			rock.Push ("MP_FLOAT_LIT");
 		}
 
 		void Rule101(){
 			Console.WriteLine ("Rule 101 used");
-			rock.Push ("<StringLiteral>");
+			rock.Push ("MP_STRING_LIT");
 		}
 
 		void Rule102(){
@@ -1416,41 +1555,41 @@ namespace Compilers
 
 		void Rule104(){
 			Console.WriteLine ("Rule 104 used");
-			rock.Push ("MP_NOT");
 			rock.Push ("<Factor>");
+			rock.Push ("MP_NOT");
 		}
 
 		void Rule105(){
 			Console.WriteLine ("Rule 105 used");
-			rock.Push ("MP_LPAREN");
-			rock.Push ("<Expression>");
 			rock.Push ("MP_RPAREN");
+			rock.Push ("<Expression>");
+			rock.Push ("MP_LPAREN");
 		}
 
 		void Rule106(){
 			Console.WriteLine ("Rule 106 used");
-			rock.Push ("<FunctionIdentifier>");
 			rock.Push ("<OptionalActualParameterList>");
+			rock.Push ("<FunctionIdentifier>");
 		}
 
 		void Rule107(){
 			Console.WriteLine ("Rule 107 used");
-			rock.Push ("<Identifier>");
+			rock.Push ("MP_IDENTIFIER");
 		}
 
 		void Rule108(){
 			Console.WriteLine ("Rule 108 used");
-			rock.Push ("<Identifier>");
+			rock.Push ("MP_IDENTIFIER");
 		}
 
 		void Rule109(){
 			Console.WriteLine ("Rule 109 used");
-			rock.Push ("<Identifier>");
+			rock.Push ("MP_IDENTIFIER");
 		}
 
 		void Rule110(){
 			Console.WriteLine ("Rule 110 used");
-			rock.Push ("<Identifier>");
+			rock.Push ("MP_IDENTIFIER");
 		}
 
 		void Rule111(){
@@ -1465,20 +1604,42 @@ namespace Compilers
 
 		void Rule113(){
 			Console.WriteLine ("Rule 113 used");
-			rock.Push ("<Identifier>");
 			rock.Push ("<IdentifierTail>");
+			rock.Push ("MP_IDENTIFIER");
 		}
 
 		void Rule114(){
 			Console.WriteLine ("Rule 114 used");
-			rock.Push ("MP_COMMA");
-			rock.Push ("<Identifier>");
 			rock.Push ("<IdentifierTail>");
+			rock.Push ("MP_IDENTIFIER");
+			rock.Push ("MP_COMMA");
 		}
 
 		void Rule115(){
 			Console.WriteLine ("Rule 115 used");
-			rock.Push ("MP_EPSILON");
+			//rock.Push ("MP_EPSILON");
+		}
+
+		void Rule116(){
+			Console.WriteLine ("Rule 116 used");
+			rock.Push ("<VariableIdentifier>");
+		}
+
+		void Rule117(){
+			Console.WriteLine ("Rule 117 used");
+			rock.Push ("<AssignProcedureTail>");
+			rock.Push ("MP_IDENTIFIER");
+		}
+
+		void Rule118(){
+			Console.WriteLine ("Rule 118 used");
+			rock.Push ("<Expression>");
+			rock.Push ("MP_ASSIGN");
+		}
+
+		void Rule119(){
+			Console.WriteLine ("Rule 119 used");
+			rock.Push ("<OptionalActualParameterList>");
 		}
 	}
 }

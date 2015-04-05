@@ -14,6 +14,7 @@ namespace Compilers
 			string contents = File.ReadAllText(@"c:\users\Austo89\Desktop\compilers\test1.txt");
 			string output = Scanner.Dispatcher (contents);
 			//.Write(output);
+			Console.WriteLine (output);
 			Parser testes = new Parser (output);
 			testes.Parse ();
 
