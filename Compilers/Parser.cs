@@ -10,12 +10,35 @@ namespace Compilers
 	{
 		private Dictionary<string, Dictionary<string,int>> lltable = new Dictionary<string, Dictionary<string,int>>();
 		private Stack rock = new Stack();
+		private Stack tables = new Stack();
+		private LabelMaker stamps = new LabelMaker ("L");
+
+		private SymbolTable currentTable;
+		private string tablename;
+		private int depth;
+		private string label;
+
+		private TableRecord currentRecord;
+		private string currentLexeme;
+		private string currentKind;
+		private string currentType;
+		private string currentMode;
+		private int currentSize;
+		private Stack lexStack = new Stack();
+
 		private StringReader tokens;
+
+		private SemanticAnalyzer annie;
 
 		public Parser (string tokens_in)
 		{
 			//initialize StringReader instance
 			tokens = new StringReader (tokens_in);
+			depth = 0;
+
+			currentMode = "null";
+
+			annie = new SemanticAnalyzer();
 
 			//initialize stack with <SystemGoal> and MP_EOF
 			//MP_EOF is the end of parse token
@@ -524,8 +547,8 @@ namespace Compilers
 				if (nextToken == "MP_EOF" || nextStackToken == "MP_EOF") {
 					continueParse = false;
 				} else if (nextStackToken == nextToken) {
-					Console.WriteLine (nextToken);
-					Console.WriteLine (nextStackToken);
+					//Console.WriteLine (nextToken);
+					//Console.WriteLine (nextStackToken);
 					nextToken = Peek ();
 					//nextStackToken = StackPeek ();
 				} else {
@@ -900,10 +923,6 @@ namespace Compilers
 						Console.WriteLine (nextToken);
 					}
 				}
-
-
-
-
 			}
 		}
 
@@ -913,6 +932,7 @@ namespace Compilers
 			string currentLine = tokens.ReadLine();
 			string nextToken;
 			StringBuilder token = new StringBuilder ();
+			StringBuilder lexeme = new StringBuilder ();
 			//grab just the token from the front of the line
 			using (StringReader grabToken = new StringReader(currentLine)){
 				Boolean isToken = true;
@@ -926,7 +946,40 @@ namespace Compilers
 			}
 			//dump the token in a string and return it
 			nextToken = token.ToString ();
-			//Console.Write (nextToken);
+
+			//eat up whitespace
+
+
+			//grab the lexeme and put it in the currentLexeme string
+			using (StringReader grabLexeme = new StringReader(currentLine)){
+				Boolean isToken = true;
+				Boolean isLex = true;
+				while (isLex) {
+					if (Char.IsWhiteSpace ((char)grabLexeme.Peek ())) {
+						if (isToken) {
+							isToken = false;
+							//remove the whitespace between token and lexeme
+							while(Char.IsWhiteSpace ((char)grabLexeme.Peek ())){
+								grabLexeme.Read ();
+							}
+						} else {
+							isLex = false;
+						}
+					} else {
+						if (isToken) {
+							//ignore the token
+							grabLexeme.Read ();
+						} else {
+							//append to the lexeme
+							lexeme.Append ((char)grabLexeme.Read());
+						}
+					}
+				}
+			}
+			currentLexeme = lexeme.ToString ();
+			Console.Write (nextToken);
+			Console.Write (" ");
+			Console.WriteLine (currentLexeme);
 			return nextToken;
 		}
 
@@ -945,6 +998,8 @@ namespace Compilers
 			Console.WriteLine ("Rule 1 used");
 			//rock.Push ("MP_EOF");
 			rock.Push ("<Program>");
+
+			annie.SetType (SType.Table);
 		}
 
 		void Rule2(){
@@ -969,11 +1024,14 @@ namespace Compilers
 		}
 
 		void Rule5(){
+			//set up to record variables
 			Console.WriteLine ("Rule 5 used");
 			rock.Push ("<VariableDeclarationTail>");
 			rock.Push ("MP_SCOLON");
 			rock.Push ("<VariableDeclaration>");
 			rock.Push ("MP_VAR");
+
+			currentKind = "var";
 		}
 
 		void Rule6(){
@@ -991,6 +1049,8 @@ namespace Compilers
 		void Rule8(){
 			Console.WriteLine ("Rule 8 used");
 			//rock.Push ("MP_EPSILON");
+
+			annie.AddTable (currentTable);
 		}
 
 		void Rule9(){
@@ -1003,21 +1063,53 @@ namespace Compilers
 		void Rule10(){
 			Console.WriteLine ("Rule 10 used");
 			rock.Push ("MP_INTEGER");
+
+			currentType = "integer";
+			currentSize = 1;
+			while(lexStack.Count != 0){
+				string nextLex = lexStack.Pop ().ToString();
+				currentRecord = new TableRecord (nextLex, currentType, currentKind, currentMode, currentSize);
+				currentTable.AddRecord (currentRecord);
+			}
 		}
 
 		void Rule11(){
 			Console.WriteLine ("Rule 11 used");
 			rock.Push ("MP_FLOAT");
+
+			currentType = "float";
+			currentSize = 1;
+			while(lexStack.Count != 0){
+				string nextLex = lexStack.Pop ().ToString();
+				currentRecord = new TableRecord (nextLex, currentType, currentKind, currentMode, currentSize);
+				currentTable.AddRecord (currentRecord);
+			}
 		}
 
 		void Rule12(){
 			Console.WriteLine ("Rule 12 used");
 			rock.Push ("MP_STRING");
+
+			currentType = "string";
+			currentSize = 1;
+			while(lexStack.Count != 0){
+				string nextLex = lexStack.Pop ().ToString();
+				currentRecord = new TableRecord (nextLex, currentType, currentKind, currentMode, currentSize);
+				currentTable.AddRecord (currentRecord);
+			}
 		}
 
 		void Rule13(){
 			Console.WriteLine ("Rule 13 used");
 			rock.Push ("MP_BOOLEAN");
+
+			currentType = "boolean";
+			currentSize = 1;
+			while(lexStack.Count != 0){
+				string nextLex = lexStack.Pop ().ToString();
+				currentRecord = new TableRecord (nextLex, currentType, currentKind, currentMode, currentSize);
+				currentTable.AddRecord (currentRecord);
+			}
 		}
 
 		void Rule14(){
@@ -1573,13 +1665,23 @@ namespace Compilers
 		}
 
 		void Rule107(){
+			//enter in a program level symbol table
 			Console.WriteLine ("Rule 107 used");
 			rock.Push ("MP_IDENTIFIER");
+
+			tablename = currentLexeme;
+			label = stamps.MakeLabel ();
+			//Console.WriteLine (label);
+			currentTable = new SymbolTable (tablename, depth, label);
+
+			depth++;
 		}
 
 		void Rule108(){
 			Console.WriteLine ("Rule 108 used");
 			rock.Push ("MP_IDENTIFIER");
+
+			lexStack.Push (currentLexeme);
 		}
 
 		void Rule109(){
@@ -1605,13 +1707,15 @@ namespace Compilers
 		void Rule113(){
 			Console.WriteLine ("Rule 113 used");
 			rock.Push ("<IdentifierTail>");
-			rock.Push ("MP_IDENTIFIER");
+			//rock.Push ("MP_IDENTIFIER");
+			rock.Push ("<VariableIdentifier>");
 		}
 
 		void Rule114(){
 			Console.WriteLine ("Rule 114 used");
 			rock.Push ("<IdentifierTail>");
-			rock.Push ("MP_IDENTIFIER");
+			//rock.Push ("MP_IDENTIFIER");
+			rock.Push ("<VariableIdentifier>");
 			rock.Push ("MP_COMMA");
 		}
 

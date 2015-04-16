@@ -15,7 +15,7 @@ namespace Compilers
 			string output = Scanner.Dispatcher (contents);
 			//.Write(output);
 			Console.WriteLine (output);
-			Parser testes = new Parser (output);
+			Parser2 testes = new Parser2 (output);
 			testes.Parse ();
 
 		}

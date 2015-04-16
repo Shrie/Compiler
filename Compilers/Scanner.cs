@@ -157,7 +157,7 @@ namespace Compilers
 				}
 			}
 			//append EOF
-			tokenizer.Append ("MP_EOF ");
+			tokenizer.Append ("MP_EOF $ ");
 
 			//move StringBuilder content to output string
 			tokens = tokenizer.ToString ();
@@ -204,6 +204,8 @@ namespace Compilers
 			reserved.Add ("var", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_VAR", "var", row_counter, column_counter, "\n"));
 			reserved.Add ("while", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WHILE", "while", row_counter, column_counter, "\n"));
 			reserved.Add ("write", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WRITE", "write", row_counter, column_counter, "\n"));
+			reserved.Add ("writeln", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WRITELN", "write", row_counter, column_counter, "\n"));
+
 
 			//read the input string with StringReader
 			using (StringReader check = new StringReader (y)) {
@@ -360,7 +362,7 @@ namespace Compilers
 									column_counter += add_count;
 									add_count = 0;
 								} else if (is_fixed) {
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FIXED_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
 									column_counter += add_count;
 									add_count = 0;
 								} else {

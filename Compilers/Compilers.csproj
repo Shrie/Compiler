@@ -33,6 +33,12 @@
   <ItemGroup>
     <Compile Include="Scanner.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Parser.cs" />
+    <Compile Include="SymbolTable.cs" />
+    <Compile Include="TableRecord.cs" />
+    <Compile Include="Parameter.cs" />
+    <Compile Include="LabelMaker.cs" />
+    <Compile Include="SemanticAnalyzer.cs" />
+    <Compile Include="SType.cs" />
+    <Compile Include="Parser2.cs" />
   </ItemGroup>
 </Project>
