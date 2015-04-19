@@ -40,5 +40,6 @@
     <Compile Include="SemanticAnalyzer.cs" />
     <Compile Include="SType.cs" />
     <Compile Include="Parser2.cs" />
+    <Compile Include="Token.cs" />
   </ItemGroup>
 </Project>

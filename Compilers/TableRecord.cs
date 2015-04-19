@@ -33,8 +33,16 @@ namespace Compilers
 			return size;
 		}
 
+		public string Lexeme(){
+			return lexeme;
+		}
+
 		public void SetOffset(int in_offset){
 			offset = in_offset;
+		}
+
+		public string Type(){
+			return type;
 		}
 
 		public void printRecord(){

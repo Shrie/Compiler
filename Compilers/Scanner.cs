@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace Compilers
 {
@@ -9,11 +10,11 @@ namespace Compilers
 	{
 		static int row_counter = 1;
 		static int column_counter = 1;
+		static ArrayList tokies = new ArrayList();
 	
 		//constructor
 		static Scanner ()
 		{
-
 
 		}
 
@@ -69,7 +70,8 @@ namespace Compilers
 								row_add++;
 							} else if (comp2 == -1) {
 
-								tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_RUN_COMMENT", lexeme.ToString (), row_counter, column_counter, "\n"));
+								//tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_RUN_COMMENT", lexeme.ToString (), row_counter, column_counter, "\n"));
+								tokies.Add (new Token("MP_RUN_COMMENT",lexeme.ToString(),row_counter,column_counter));
 								eoc = true;
 								err_flag = true;
 								column_counter += add_count;
@@ -86,7 +88,8 @@ namespace Compilers
 						}
 						//int junk2 = check.Read();
 						if (!err_flag) {
-							tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COMMENT", lexeme.ToString (), row_counter, column_counter, "\n"));
+							//tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COMMENT", lexeme.ToString (), row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_COMMENT",lexeme.ToString(),row_counter,column_counter));
 							column_counter += add_count;
 							row_counter += row_add;
 						}
@@ -110,7 +113,8 @@ namespace Compilers
 								add_count++;
 							} else if (comp2 == 13 || comp2 == 133 || comp2 == -1) {
 
-								tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING_RUN", lexeme.ToString (), row_counter, column_counter, "\n"));
+								//tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING_RUN", lexeme.ToString (), row_counter, column_counter, "\n"));
+								tokies.Add (new Token("MP_STRING_RUN",lexeme.ToString(),row_counter,column_counter));
 								eos = true;
 								run_flag = true;
 								column_counter += add_count;
@@ -128,7 +132,8 @@ namespace Compilers
 						}
 						//int junk2 = check.Read();
 						if (!run_flag) {
-							tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+							//tokenizer.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_STRING_LIT",lexeme.ToString(),row_counter,column_counter));
 							column_counter += add_count;
 
 						}
@@ -157,7 +162,8 @@ namespace Compilers
 				}
 			}
 			//append EOF
-			tokenizer.Append ("MP_EOF $ ");
+			//tokenizer.Append ("MP_EOF $ ");
+			tokies.Add (new Token("MP_EOF","$",row_counter,column_counter));
 
 			//move StringBuilder content to output string
 			tokens = tokenizer.ToString ();
@@ -173,38 +179,74 @@ namespace Compilers
 			string process;
 			StringBuilder build = new StringBuilder ();
 
-			Dictionary<string, string> reserved = new Dictionary<string, string> ();
-			reserved.Add ("and", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_AND", "and", row_counter, column_counter, "\n"));
-			reserved.Add ("begin", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BEGIN", "begin", row_counter, column_counter, "\n"));
-			reserved.Add ("boolean", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BOOLEAN", "boolean", row_counter, column_counter, "\n"));
-			reserved.Add ("div", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DIV", "div", row_counter, column_counter, "\n"));
-			reserved.Add ("do", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DO", "do", row_counter, column_counter, "\n"));
-			reserved.Add ("downto", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DOWNTO", "downto", row_counter, column_counter, "\n"));
-			reserved.Add ("else", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ELSE", "else", row_counter, column_counter, "\n"));
-			reserved.Add ("end", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_END", "end", row_counter, column_counter, "\n"));
-			reserved.Add ("false", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FALSE", "false", row_counter, column_counter, "\n"));
-			reserved.Add ("fixed", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FIXED", "fixed", row_counter, column_counter, "\n"));
-			reserved.Add ("float", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT", "float", row_counter, column_counter, "\n"));
-			reserved.Add ("for", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FOR", "for", row_counter, column_counter, "\n"));
-			reserved.Add ("function", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FUNCTION", "function", row_counter, column_counter, "\n"));
-			reserved.Add ("if", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IF", "if", row_counter, column_counter, "\n"));
-			reserved.Add ("integer", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_INTEGER", "integer", row_counter, column_counter, "\n"));
-			reserved.Add ("mod", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_MOD", "mod", row_counter, column_counter, "\n"));
-			reserved.Add ("not", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_NOT", "not", row_counter, column_counter, "\n"));
-			reserved.Add ("or", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_OR", "or", row_counter, column_counter, "\n"));
-			reserved.Add ("procedure", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PROCEDURE", "procedure", row_counter, column_counter, "\n"));
-			reserved.Add ("program", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PROGRAM", "program", row_counter, column_counter, "\n"));
-			reserved.Add ("read", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_READ", "read", row_counter, column_counter, "\n"));
-			reserved.Add ("repeat", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_REPEAT", "repeat", row_counter, column_counter, "\n"));
-			reserved.Add ("string", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING", "string", row_counter, column_counter, "\n"));
-			reserved.Add ("then", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_THEN", "then", row_counter, column_counter, "\n"));
-			reserved.Add ("to", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TO", "to", row_counter, column_counter, "\n"));
-			reserved.Add ("type", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TYPE", "type", row_counter, column_counter, "\n"));
-			reserved.Add ("until", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_UNTIL", "until", row_counter, column_counter, "\n"));
-			reserved.Add ("var", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_VAR", "var", row_counter, column_counter, "\n"));
-			reserved.Add ("while", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WHILE", "while", row_counter, column_counter, "\n"));
-			reserved.Add ("write", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WRITE", "write", row_counter, column_counter, "\n"));
-			reserved.Add ("writeln", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WRITELN", "write", row_counter, column_counter, "\n"));
+//			Dictionary<string, string> reserved = new Dictionary<string, string> ();
+//			reserved.Add ("and", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_AND", "and", row_counter, column_counter, "\n"));
+//			reserved.Add ("begin", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BEGIN", "begin", row_counter, column_counter, "\n"));
+//			reserved.Add ("boolean", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_BOOLEAN", "boolean", row_counter, column_counter, "\n"));
+//			reserved.Add ("div", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DIV", "div", row_counter, column_counter, "\n"));
+//			reserved.Add ("do", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DO", "do", row_counter, column_counter, "\n"));
+//			reserved.Add ("downto", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DOWNTO", "downto", row_counter, column_counter, "\n"));
+//			reserved.Add ("else", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ELSE", "else", row_counter, column_counter, "\n"));
+//			reserved.Add ("end", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_END", "end", row_counter, column_counter, "\n"));
+//			reserved.Add ("false", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FALSE", "false", row_counter, column_counter, "\n"));
+//			reserved.Add ("fixed", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FIXED", "fixed", row_counter, column_counter, "\n"));
+//			reserved.Add ("float", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT", "float", row_counter, column_counter, "\n"));
+//			reserved.Add ("for", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FOR", "for", row_counter, column_counter, "\n"));
+//			reserved.Add ("function", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FUNCTION", "function", row_counter, column_counter, "\n"));
+//			reserved.Add ("if", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IF", "if", row_counter, column_counter, "\n"));
+//			reserved.Add ("integer", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_INTEGER", "integer", row_counter, column_counter, "\n"));
+//			reserved.Add ("mod", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_MOD", "mod", row_counter, column_counter, "\n"));
+//			reserved.Add ("not", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_NOT", "not", row_counter, column_counter, "\n"));
+//			reserved.Add ("or", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_OR", "or", row_counter, column_counter, "\n"));
+//			reserved.Add ("procedure", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PROCEDURE", "procedure", row_counter, column_counter, "\n"));
+//			reserved.Add ("program", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PROGRAM", "program", row_counter, column_counter, "\n"));
+//			reserved.Add ("read", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_READ", "read", row_counter, column_counter, "\n"));
+//			reserved.Add ("repeat", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_REPEAT", "repeat", row_counter, column_counter, "\n"));
+//			reserved.Add ("string", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_STRING", "string", row_counter, column_counter, "\n"));
+//			reserved.Add ("then", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_THEN", "then", row_counter, column_counter, "\n"));
+//			reserved.Add ("to", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TO", "to", row_counter, column_counter, "\n"));
+//			reserved.Add ("type", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TYPE", "type", row_counter, column_counter, "\n"));
+//			reserved.Add ("until", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_UNTIL", "until", row_counter, column_counter, "\n"));
+//			reserved.Add ("var", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_VAR", "var", row_counter, column_counter, "\n"));
+//			reserved.Add ("while", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WHILE", "while", row_counter, column_counter, "\n"));
+//			reserved.Add ("write", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WRITE", "write", row_counter, column_counter, "\n"));
+//			reserved.Add ("writeln", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_WRITELN", "writeln", row_counter, column_counter, "\n"));
+//			reserved.Add ("true", String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TRUE", "true", row_counter, column_counter, "\n"));
+
+			Dictionary<string, string> reserved2 = new Dictionary<string, string> ();
+			reserved2.Add ("and", "MP_AND");
+			reserved2.Add ("begin", "MP_BEGIN");
+			reserved2.Add ("boolean", "MP_BOOLEAN");
+			reserved2.Add ("div", "MP_DIV");
+			reserved2.Add ("do", "MP_DO");
+			reserved2.Add ("downto", "MP_DOWNTO");
+			reserved2.Add ("else", "MP_ELSE");
+			reserved2.Add ("end", "MP_END");
+			reserved2.Add ("false", "MP_FALSE");
+			reserved2.Add ("fixed","MP_FIXED");
+			reserved2.Add ("float", "MP_FLOAT");
+			reserved2.Add ("for", "MP_FOR");
+			reserved2.Add ("function", "MP_FUNCTION");
+			reserved2.Add ("if","MP_IF");
+			reserved2.Add ("integer","MP_INTEGER");
+			reserved2.Add ("mod", "MP_MOD");
+			reserved2.Add ("not","MP_NOT");
+			reserved2.Add ("or", "MP_OR");
+			reserved2.Add ("procedure", "MP_PROCEDURE");
+			reserved2.Add ("program","MP_PROGRAM");
+			reserved2.Add ("read",  "MP_READ");
+			reserved2.Add ("repeat", "MP_REPEAT");
+			reserved2.Add ("string","MP_STRING");
+			reserved2.Add ("then", "MP_THEN");
+			reserved2.Add ("to","MP_TO");
+			reserved2.Add ("type","MP_TYPE");
+			reserved2.Add ("until","MP_UNTIL");
+			reserved2.Add ("var", "MP_VAR");
+			reserved2.Add ("while",  "MP_WHILE");
+			reserved2.Add ("write", "MP_WRITE");
+			reserved2.Add ("writeln", "MP_WRITELN");
+			reserved2.Add ("true", "MP_TRUE");
+
 
 
 			//read the input string with StringReader
@@ -241,13 +283,16 @@ namespace Compilers
 								string res_check = id_build.ToString ();
 								string lower_case = res_check.ToLower ();
 								try {
-									string res = reserved [lower_case];
-									build.Append (res);
+									//string res = reserved [lower_case];
+									//build.Append (res);
+									string stuff = reserved2 [lower_case];
+									tokies.Add (new Token(stuff,lower_case.ToString(),row_counter,column_counter));
 									column_counter += add_count;
 								} catch (KeyNotFoundException) {
 									//reached the end of the id, return id token and exit the loop
 
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IDENTIFIER", lower_case.ToString (), row_counter, column_counter, "\n"));
+									//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_IDENTIFIER", lower_case.ToString (), row_counter, column_counter, "\n"));
+									tokies.Add (new Token("MP_IDENTIFIER",lower_case.ToString(),row_counter,column_counter));
 									column_counter += add_count;
 									add_count = 0;
 								}
@@ -283,7 +328,8 @@ namespace Compilers
 							else if (comp2 == 46) {
 								if (is_fixed || is_float) {
 									//it already contains a decimal, so it's an error
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+									//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
 									add_count = 0;
@@ -302,7 +348,8 @@ namespace Compilers
 									//the next char is a digit, do nothing
 								} else {
 									//not a digit, raise an error flag
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+									//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
 									add_count = 0;
@@ -313,7 +360,8 @@ namespace Compilers
 								if (is_float) {
 									//the number already contained an e or E
 									//it's an error
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+									//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
 									add_count = 0;
@@ -337,7 +385,8 @@ namespace Compilers
 										//found a digit, all is well
 									} else {
 										//not a digit, return an error
-										build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+										//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+										tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
 										is_num = false;
 										column_counter += add_count;
 										add_count = 0;
@@ -348,7 +397,8 @@ namespace Compilers
 									//found a digit, everything checks out
 								} else {
 									//no digit, no token for you
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+									//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", lexeme.ToString (), row_counter, column_counter, "\n"));
+									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
 									add_count = 0;
@@ -358,15 +408,18 @@ namespace Compilers
 								//number it is based on the flags
 
 								if (is_float) {
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+									//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+									tokies.Add (new Token("MP_FLOAT_LIT",lexeme.ToString(),row_counter,column_counter));
 									column_counter += add_count;
 									add_count = 0;
 								} else if (is_fixed) {
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+									//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_FLOAT_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+									tokies.Add (new Token("MP_FLOAT_LIT",lexeme.ToString(),row_counter,column_counter));
 									column_counter += add_count;
 									add_count = 0;
 								} else {
-									build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_INTEGER_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+									//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_INTEGER_LIT", lexeme.ToString (), row_counter, column_counter, "\n"));
+									tokies.Add (new Token("MP_INTEGER_LIT",lexeme.ToString(),row_counter,column_counter));
 									column_counter += add_count;
 									add_count = 0;
 								}
@@ -377,71 +430,89 @@ namespace Compilers
 						}
 
 					} else if (comp == 46) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PERIOD", ".", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PERIOD", ".", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_PERIOD",".",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 44) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COMMA", ",", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COMMA", ",", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_COMMA",",",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 59) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_SCOLON", ";", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_SCOLON", ";", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_SCOLON",";",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 40) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LPAREN", "(", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LPAREN", "(", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_LPAREN","(",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 41) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_RPAREN", ")", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_RPAREN", ")", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_RPAREN",")",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 61) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_EQUAL", "=", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_EQUAL", "=", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_EQUAL","=",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 62) {
 						int i62 = check.Peek ();
 						if (i62 == 61) {
 							int junk = check.Read ();
 							column_counter++;
-							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_GEQUAL", ">=", row_counter, column_counter, "\n"));
+							//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_GEQUAL", ">=", row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_GEQUAL",">=",row_counter,column_counter));
 						} else {
-							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_GTHAN", ">", row_counter, column_counter, "\n"));
+							//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_GTHAN", ">", row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_GTHAN",">",row_counter,column_counter));
 						} 
 					} else if (comp == 60) {
 						int i60 = check.Peek ();
 						if (i60 == 61) {
 							int junk = check.Read ();
 							column_counter++;
-							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LEQUAL", "<=", row_counter, column_counter, "\n"));
+							//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LEQUAL", "<=", row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_LEQUAL","<=",row_counter,column_counter));
 						} else if (i60 == 62) {
 							int junk = check.Read ();
 							column_counter++;
-							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_NEQUAL", "<>", row_counter, column_counter, "\n"));
+							//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_NEQUAL", "<>", row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_NEQUAL","<>",row_counter,column_counter));
 						} else {
-							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LTHAN", "<", row_counter, column_counter, "\n"));
+							//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_LTHAN", "<", row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_LTHAN","<",row_counter,column_counter));
 						} 
 					} else if (comp == 58) {
 						int i58 = check.Peek ();
 						if (i58 == 61) {
 							int junk = check.Read ();
-							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ASSIGN", ":=", row_counter, column_counter, "\n"));
+							//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ASSIGN", ":=", row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_ASSIGN",":=",row_counter,column_counter));
 							column_counter += 2;
 						} else {
-							build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COLON", ":", row_counter, column_counter, "\n"));
+							//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_COLON", ":", row_counter, column_counter, "\n"));
+							tokies.Add (new Token("MP_COLON",":",row_counter,column_counter));
 							column_counter++;
 						}
 					} else if (comp == 43) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PLUS", "+", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_PLUS", "+", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_PLUS","+",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 47) { 
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DIVIDE", "\\", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_DIVIDE", "/", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_DIVIDE","/",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 45) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_MINUS", "-", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_MINUS", "-", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_MINUS","-",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 42) {
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TIMES", "*", row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_TIMES", "*", row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_TIMES","*",row_counter,column_counter));
 						column_counter++;
 					} else {
 						//Console.Write (comp);
 						//character unrecognized, append error to string
 						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", (char)comp, row_counter, column_counter, "\n"));
+						tokies.Add (new Token("MP_ERROR",comp.ToString(),row_counter,column_counter));
 						column_counter++;
 					}
 
@@ -455,6 +526,10 @@ namespace Compilers
 
 			process = build.ToString ();
 			return process;
+		}
+
+		public static ArrayList GetTokenArray(){
+			return tokies;
 		}
 	}
 }

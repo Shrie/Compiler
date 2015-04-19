@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections;
 
 namespace Compilers
 {
@@ -13,11 +14,11 @@ namespace Compilers
 			//@"/Users/David/Desktop/test1.txt"
 			string contents = File.ReadAllText(@"c:\users\Austo89\Desktop\compilers\test1.txt");
 			string output = Scanner.Dispatcher (contents);
+			ArrayList outies = Scanner.GetTokenArray();
 			//.Write(output);
 			Console.WriteLine (output);
-			Parser2 testes = new Parser2 (output);
+			Parser2 testes = new Parser2 (output,outies);
 			testes.Parse ();
-
 		}
 	}
 }

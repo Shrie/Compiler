@@ -7,79 +7,73 @@ namespace Compilers
 {
 	public class Parser2
 	{
+		private LabelMaker labelMe;
+
 		private SymbolTable currentTable;
 		private string tablename;
 		private int depth;
 		private string label;
 
+		private TableRecord cRecord;
+		private string rLex;
+		private string rType;
+		private string rKind;
+		private string rMode;
+		private int rSize;
+		private int rOffset;
+		private Stack rLexStack;
+
 		private StringReader tokens;
 		private string currentLexeme;
 		private string ct;
+		private int curCol;
+		private int curRow;
+		private ArrayList tokes;
+		private int tokePoint;
 
 		private SemanticAnalyzer annie;
+		private bool assignFlag;
 
-		public Parser2 (string tokens_in)
+		public Parser2 (string tokens_in, ArrayList tokes_in)
 		{
 			tokens = new StringReader (tokens_in);
+			tokes = tokes_in;
+			tokePoint = 0;
 
 			annie = new SemanticAnalyzer ();
+			assignFlag = false;
+
+			depth = 0;
+
+			labelMe = new LabelMaker ("L");
+
+			rLexStack = new Stack ();
+			rMode = "null";
+			rOffset = 0;
 		}
 
-		//grab the next token from the token stream
 		public void Peek(){
-			//grab the next token, lexeme, column & row number
-			string currentLine = tokens.ReadLine();
-			string nextToken;
-			StringBuilder token = new StringBuilder ();
-			StringBuilder lexeme = new StringBuilder ();
-			//grab just the token from the front of the line
-			using (StringReader grabToken = new StringReader(currentLine)){
-				Boolean isToken = true;
-				while (isToken) {
-					if (Char.IsWhiteSpace ((char)grabToken.Peek ())) {
-						isToken = false;
-					} else {
-						token.Append ((char)grabToken.Read());
-					}
+			if (tokePoint < tokes.Count) {
+				ct = ((Token)tokes[tokePoint]).GetName();
+				currentLexeme = ((Token)tokes[tokePoint]).GetLex();
+				curCol = ((Token)tokes[tokePoint]).GetCol();
+				curRow = ((Token)tokes[tokePoint]).GetRow();
+
+				Console.Write ("Looking at token: ");
+				Console.Write (ct);
+				Console.Write (" ");
+				Console.WriteLine (currentLexeme);
+
+				tokePoint++;
+
+				if(ct == "MP_COMMENT"){
+					Peek ();
 				}
+
+
+			} else {
+				Console.WriteLine ("Out of tokens.");
 			}
-			//dump the token in a string and return it
-			nextToken = token.ToString ();
-
-			//eat up whitespace
-
-
-			//grab the lexeme and put it in the currentLexeme string
-			using (StringReader grabLexeme = new StringReader(currentLine)){
-				Boolean isToken = true;
-				Boolean isLex = true;
-				while (isLex) {
-					if (Char.IsWhiteSpace ((char)grabLexeme.Peek ())) {
-						if (isToken) {
-							isToken = false;
-							//remove the whitespace between token and lexeme
-							while(Char.IsWhiteSpace ((char)grabLexeme.Peek ())){
-								grabLexeme.Read ();
-							}
-						} else {
-							isLex = false;
-						}
-					} else {
-						if (isToken) {
-							//ignore the token
-							grabLexeme.Read ();
-						} else {
-							//append to the lexeme
-							lexeme.Append ((char)grabLexeme.Read());
-						}
-					}
-				}
-			}
-			currentLexeme = lexeme.ToString ();
-			Console.Write (nextToken);
-			Console.Write (" ");
-			Console.WriteLine (currentLexeme);
-			ct = nextToken;
 		}
 
 		public void Parse(){
@@ -89,38 +83,83 @@ namespace Compilers
 			//start with the SystemGoal rule 1
 			if (ct == "MP_PROGRAM") {
 				Program ();
+			} else {
+				Console.Write ("Syntax error on row: ");
+				Console.Write (curRow);
+				Console.Write ("  column: ");
+				Console.Write (curCol);
+				Console.Write ("  Expected keyword 'program', got ");
+				Console.WriteLine (currentLexeme);
 			}
 
 			if (ct == "MP_EOF"){
 				Console.WriteLine ("Program parsed successfully!");
+				annie.PrintCode ();
 			}
 		}
 
 		public void Program(){
-			if (ct == "MP_PROGRAM"){
+			if (ct == "MP_PROGRAM") {
 				//Rule 2
 				ProgramHeading ();
 
-				if(ct == "MP_SCOLON"){
+				if (ct == "MP_SCOLON") {
 					Peek ();
+				} else {
+					//error check
+					Console.Write ("Syntax error on row: ");
+					Console.Write (curRow);
+					Console.Write ("  column: ");
+					Console.Write (curCol);
+					Console.Write ("  Expected ';', got ");
+					Console.WriteLine (currentLexeme);
 				}
 
 				Block ();
 
 				if (ct == "MP_PERIOD") {
 					Peek ();
+				} else {
+					//error check
+					Console.Write ("Syntax error on row: ");
+					Console.Write (curRow);
+					Console.Write ("  column: ");
+					Console.Write (curCol);
+					Console.Write ("  Expected '.', got ");
+					Console.WriteLine (currentLexeme);
 				}
+			} else {
+				//error check
+				Console.Write ("Syntax error on row: ");
+				Console.Write (curRow);
+				Console.Write ("  column: ");
+				Console.Write (curCol);
+				Console.Write ("  Expected keyword 'program', got ");
+				Console.WriteLine (currentLexeme);
 			}
 		}
 
 		public void ProgramHeading(){
-			if(ct == "MP_PROGRAM"){
+			if (ct == "MP_PROGRAM") {
 				//rule 3
 				if (ct == "MP_PROGRAM") {
 					Peek ();
 				}
+				//set new table name and label
+				tablename = currentLexeme;
+				label = labelMe.MakeLabel ();
+				currentTable = new SymbolTable (tablename, depth, label);
+				depth++;
 
 				ProgramIdentifier ();
+			} else {
+				//error check
+				Console.Write ("Syntax error on row: ");
+				Console.Write (curRow);
+				Console.Write ("  column: ");
+				Console.Write (curCol);
+				Console.Write ("  Expected keyword'program', got ");
+				Console.WriteLine (currentLexeme);
 			}
 		}
 
@@ -130,6 +169,10 @@ namespace Compilers
 				VariableDeclarationPart ();
 
 				ProcedureAndFunctionDeclarationPart ();
+
+				//pass code to analyzer and gen code
+				annie.AddTable (currentTable);
+				annie.GenTable();
 
 				StatementPart ();
 			}
@@ -141,6 +184,9 @@ namespace Compilers
 				if(ct == "MP_VAR"){
 					Peek ();
 				}
+
+				//set kind to var
+				rKind = "var";
 
 				VariableDeclaration ();
 
@@ -183,6 +229,15 @@ namespace Compilers
 				}
 
 				Type ();
+
+				//insert vars to symbol table
+				while(rLexStack.Count != 0){
+					rLex = (string)rLexStack.Pop ();
+					cRecord = new TableRecord (rLex,rType,rKind,rMode,rSize);
+					//cRecord.SetOffset (rOffset);
+					//rOffset++;
+					currentTable.AddRecord (cRecord);
+				}
 			}
 		}
 
@@ -190,18 +245,30 @@ namespace Compilers
 			if (ct == "MP_INTEGER") {
 				//rule10
 				Peek ();
+
+				rType = "int";
+				rSize = 1;
 			}
 			else if(ct == "MP_FLOAT"){
 				//rule11
 				Peek ();
+
+				rType = "float";
+				rSize = 1;
 			}
-			else if(ct == "MP_STRING_LIT"){
+			else if(ct == "MP_STRING"){
 				//rule12
 				Peek ();
+
+				rType = "string";
+				rSize = 1;
 			}
 			else if(ct == "MP_BOOLEAN"){
 				//rule13
 				Peek ();
+
+				rType = "bool";
+				rSize = 1;
 			}
 		}
 
@@ -520,9 +587,11 @@ namespace Compilers
 
 		public void WriteParameter(){
 			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-				ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule53
 				OrdinalExpression ();
+			} else {
+				Console.WriteLine ("Syntax Error");
 			}
 		}
 
@@ -702,9 +771,11 @@ namespace Compilers
 			if (ct == "MP_EQUAL" || ct == "MP_GEQUAL" || ct == "MP_LEQUAL" || ct == "MP_GTHAN" || ct == "MP_LTHAN" ||
 			    ct == "MP_NEQUAL") {
 				//rule74
+				annie.PassOp (currentLexeme);
 				RelationalOperator ();
 
 				SimpleExpression ();
+				annie.GenArithmetic ();
 			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_THEN" ||
 			           ct == "MP_TO" || ct == "MP_UNTIL" || ct == "MP_SCOLON" || ct == "MP_COMMA" || ct == "MP_LPAREN") {
 				//rule75 - lambda
@@ -748,9 +819,11 @@ namespace Compilers
 		public void TermTail(){
 			if (ct == "MP_PLUS" || ct == "MP_MINUS" || ct == "MP_OR") {
 				//rule83
+				annie.PassOp (currentLexeme);
 				AddingOperator ();
 
 				Term ();
+				annie.GenArithmetic ();
 
 				TermTail ();
 			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_THEN" || ct == "MP_TO" || ct == "MP_UNTIL" ||
@@ -799,7 +872,13 @@ namespace Compilers
 		public void FactorTail(){
 			if (ct == "MP_AND" || ct == "MP_DIV" || ct == "MP_MOD" || ct == "MP_TIMES" || ct == "MP_DIVIDE") {
 				//rule92
+				annie.PassOp (currentLexeme);
 				MultiplyingOperator ();
+
+				Factor ();
+				annie.GenArithmetic ();
+
+				FactorTail ();
 			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_OR" || ct == "MP_THEN" ||
 			           ct == "MP_TO" || ct == "MP_UNTIL" || ct == "MP_COMMA" || ct == "MP_SCOLON" || ct == "MP_RPAREN" || ct == "MP_EQUAL" ||
 			           ct == "MP_LTHAN" || ct == "MP_GTHAN" || ct == "MP_LEQUAL" || ct == "MP_GEQUAL" || ct == "MP_NEQUAL" ||
@@ -830,15 +909,19 @@ namespace Compilers
 		public void Factor(){
 			if (ct == "MP_INTEGER_LIT") {
 				//rule99
+				annie.GenPushLit (currentLexeme,"int");
 				Peek ();
 			} else if (ct == "MP_FLOAT_LIT") {
 				//rule100
+				annie.GenPushLit (currentLexeme,"float");
 				Peek ();
 			} else if (ct == "MP_STRING_LIT") {
 				//rule101
+				annie.GenPushLit (currentLexeme,"string");
 				Peek ();
 			} else if (ct == "MP_TRUE") {
 				//rule102
+				annie.GenPushLit (currentLexeme,"boolean");
 				Peek ();
 			} else if (ct == "MP_FALSE") {
 				//rule103
@@ -859,6 +942,7 @@ namespace Compilers
 				}
 			} else if (ct == "MP_IDENTIFIER") {
 				//rule116
+				annie.GenPushID (currentLexeme);
 				VariableIdentifier ();
 			}
 		}
@@ -910,6 +994,8 @@ namespace Compilers
 		public void IdentifierList(){
 			if (ct == "MP_IDENTIFIER") {
 				//rule113
+				//push on the lex on the stack
+				rLexStack.Push (currentLexeme);
 				VariableIdentifier ();
 
 				IdentifierTail ();
@@ -921,6 +1007,7 @@ namespace Compilers
 				//rule114
 				Peek ();
 
+				rLexStack.Push (currentLexeme);
 				VariableIdentifier ();
 
 				IdentifierTail ();
@@ -932,15 +1019,22 @@ namespace Compilers
 		public void AssignProcedureStatement(){
 			if (ct == "MP_IDENTIFIER") {
 				//rule117
+				string target = currentLexeme;
 				VariableIdentifier ();
 
 				AssignProcedureTail ();
+
+				if (assignFlag) {
+					annie.GenAssign (target);
+					assignFlag = false;
+				}
 			}
 		}
 
 		public void AssignProcedureTail(){
 			if (ct == "MP_ASSIGN") {
 				//rule118
+				assignFlag = true;
 				Peek ();
 
 				Expression ();
