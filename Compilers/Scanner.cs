@@ -146,7 +146,7 @@ namespace Compilers
 							//loop until the next char is whitespace or EOF
 							str.Append ((char)win.Read ());
 							white_space = Char.IsWhiteSpace ((char)win.Peek ());
-							if (win.Peek () == -1) {
+							if (win.Peek () == -1 || win.Peek() == 39) {
 								white_space = true;
 							}
 						}
@@ -511,7 +511,7 @@ namespace Compilers
 					} else {
 						//Console.Write (comp);
 						//character unrecognized, append error to string
-						build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", (char)comp, row_counter, column_counter, "\n"));
+						//build.Append (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", "MP_ERROR", (char)comp, row_counter, column_counter, "\n"));
 						tokies.Add (new Token("MP_ERROR",comp.ToString(),row_counter,column_counter));
 						column_counter++;
 					}
@@ -530,6 +530,16 @@ namespace Compilers
 
 		public static ArrayList GetTokenArray(){
 			return tokies;
+		}
+
+		public static void PrintTokies(){
+			int i = 0;
+			while (i < tokies.Count) {
+				Token printTok = (Token)tokies [i];
+				Console.Write (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", printTok.GetName(), printTok.GetLex(), printTok.GetRow(), printTok.GetCol(), "\n"));
+
+				i++;
+			}
 		}
 	}
 }

@@ -13,17 +13,19 @@ namespace Compilers
 		private LabelMaker labelMe;
 
 		private SymbolTable currentTable;
+		private SymbolTable nextTable;
 		private string tablename;
 		private int depth;
 		private string label;
 
 		private TableRecord cRecord;
+		private TableRecord pfRecord;
 		private string rLex;
 		private string rType;
 		private string rKind;
 		private string rMode;
 		private int rSize;
-		private int rOffset;
+		//private int rOffset;
 		private Stack rLexStack;
 
 		private StringReader tokens;
@@ -40,6 +42,7 @@ namespace Compilers
 		public Parser2 (string tokens_in, ArrayList tokes_in)
 		{
 			hasError = false;
+			errors = new ArrayList ();
 
 			tokens = new StringReader (tokens_in);
 			tokes = tokes_in;
@@ -54,7 +57,7 @@ namespace Compilers
 
 			rLexStack = new Stack ();
 			rMode = "null";
-			rOffset = 0;
+			//rOffset = 0;
 		}
 
 		public void Peek(){
@@ -96,10 +99,14 @@ namespace Compilers
 			if (ct == "MP_EOF"){
 				if (hasError) {
 					Console.WriteLine ("Parse failed!!! What have you done!?");
+					PrintErrors ();
 				} else {
 					Console.WriteLine ("Program parsed successfully!");
 					annie.PrintCode ();
 				}
+			} else if (hasError) {
+				Console.WriteLine ("Parse failed!!! What have you done!?");
+				PrintErrors ();
 			}
 		}
 
@@ -157,7 +164,7 @@ namespace Compilers
 				ProcedureAndFunctionDeclarationPart ();
 
 				//pass code to analyzer and gen code
-				annie.AddTable (currentTable);
+				annie.AddTable (currentTable, currentTable.GetDepth());
 				annie.GenTable ();
 
 				StatementPart ();
@@ -281,12 +288,14 @@ namespace Compilers
 				//rule14
 				Console.WriteLine ("Using rule 14");
 				ProcedureDeclaration ();
+				depth--;
 
 				ProcedureAndFunctionDeclarationPart ();
 			} else if (ct == "MP_FUNCTION") {
 				//rule15
 				Console.WriteLine ("Using rule 15");
 				FunctionDeclaration ();
+				depth--;
 
 				ProcedureAndFunctionDeclarationPart ();
 			} else if (ct == "MP_BEGIN") {
@@ -350,10 +359,22 @@ namespace Compilers
 				//rule19
 				Console.WriteLine ("Using rule 19");
 				Peek ();
+				string labelIt = labelMe.MakeLabel ();
+				nextTable = new SymbolTable (currentLexeme, depth, labelIt);
+				depth++;
+
+				rKind = "procedure";
+				rSize = 0;
+				rLex = currentLexeme;
+				rType = "null";
+				pfRecord = new TableRecord (rLex,rType,rKind,rMode,rSize);
 
 				ProcedureIdentifier ();
 
 				OptionalFormalParameterList ();
+
+				currentTable.AddRecord (pfRecord);
+				currentTable = nextTable;
 			} else {
 				errorMessage ("keyword 'procedure'");
 			}
@@ -365,6 +386,16 @@ namespace Compilers
 				Console.WriteLine ("Using rule 20");
 				Peek ();
 
+				string labelIt = labelMe.MakeLabel ();
+				nextTable = new SymbolTable (currentLexeme, depth, labelIt);
+				depth++;
+
+				rKind = "function";
+				rSize = 0;
+				rLex = currentLexeme;
+				rType = "null";
+				pfRecord = new TableRecord (rLex,rType,rKind,rMode,rSize);
+
 				FunctionIdentifier ();
 
 				OptionalFormalParameterList ();
@@ -372,7 +403,7 @@ namespace Compilers
 				if (ct == "MP_COLON") {
 					Peek ();
 				} else {
-					errorMessage (";");
+					errorMessage (":");
 				}
 
 				Type ();
@@ -386,6 +417,7 @@ namespace Compilers
 				//rule21
 				Console.WriteLine ("Using rule 21");
 				Peek ();
+				rKind = "var";
 
 				FormalParameterSection ();
 
@@ -438,6 +470,7 @@ namespace Compilers
 		public void ValueParameterSection(){
 			if (ct == "MP_IDENTIFIER") {
 				//rule27
+				rMode = "in";
 				Console.WriteLine ("Using rule 27");
 				IdentifierList ();
 
@@ -448,6 +481,22 @@ namespace Compilers
 				}
 
 				Type ();
+
+				Stack tStack = new Stack ();
+				while (rLexStack.Count != 0) {
+					rLex = (string)rLexStack.Pop ();
+					cRecord = new TableRecord (rLex, rType, rKind, rMode, rSize);
+					//cRecord.SetOffset (rOffset);
+					//rOffset++;
+					nextTable.AddRecord (cRecord);
+					Parameter pParam = new Parameter (rMode,rType);
+					tStack.Push (pParam);
+				}
+				while(tStack.Count != 0){
+					pfRecord.addParam ((Parameter)tStack.Pop());
+				}
+
+				rMode = "null";
 			} else {
 				errorMessage ("an identifier");
 			}
@@ -456,6 +505,7 @@ namespace Compilers
 		public void VariableParameterSection(){
 			if (ct == "MP_VAR") {
 				//rule28
+				rMode = "inout";
 				Console.WriteLine ("Using rule 28");
 				Peek ();
 
@@ -468,6 +518,22 @@ namespace Compilers
 				}
 
 				Type ();
+
+				Stack tStack = new Stack ();
+				while (rLexStack.Count != 0) {
+					rLex = (string)rLexStack.Pop ();
+					cRecord = new TableRecord (rLex, rType, rKind, rMode, rSize);
+					//cRecord.SetOffset (rOffset);
+					//rOffset++;
+					nextTable.AddRecord (cRecord);
+					Parameter fParam = new Parameter (rMode,rType);
+					tStack.Push (fParam);
+				}
+				while(tStack.Count != 0){
+					pfRecord.addParam ((Parameter)tStack.Pop());
+				}
+
+				rMode = "null";
 			} else {
 				errorMessage ("'var'");
 			}
@@ -888,7 +954,10 @@ namespace Compilers
 				} else {
 					errorMessage ("')'");
 				}
-			} else if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL") {
+			} else if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL" || ct == "MP_EQUAL" || ct == "MP_LTHAN" ||
+				ct == "MP_GTHAN" || ct == "MP_LEQUAL" || ct == "MP_GEQUAL" || ct == "MP_NEQUAL" || ct == "MP_PLUS" || 
+				ct == "MP_TIMES" || ct == "MP_MINUS" || ct == "MP_DIVIDE" || ct == "MP_DIV" || ct == "MP_AND" ||
+				ct == "MP_OR" || ct == "MP_DO" || ct == "MP_COMMA" || ct == "MP_RPAREN" || ct == "MP_SCOLON") {
 				//rule69 - lambda
 				Console.WriteLine ("Using rule 69");
 			} else {
@@ -1167,6 +1236,8 @@ namespace Compilers
 				Console.WriteLine ("Using rule 116");
 				annie.GenPushID (currentLexeme);
 				VariableIdentifier ();
+
+				OptionalActualParameterList ();
 			} else {
 				errorMessage ("a factor");
 			}
@@ -1292,7 +1363,7 @@ namespace Compilers
 				Peek ();
 
 				Expression ();
-			} else if (ct == "MP_LPAREN") {
+			} else if (ct == "MP_LPAREN" || ct == "MP_SCOLON") {
 				OptionalActualParameterList ();
 			} else {
 				errorMessage ("'(' or ':='");
@@ -1301,18 +1372,27 @@ namespace Compilers
 
 		public void errorMessage(string expected){
 			//error check
-			Console.Write ("Syntax error on row: ");
-			Console.Write (curRow);
-			Console.Write ("  column: ");
-			Console.Write (curCol);
-			Console.Write ("  Expected ");
-			Console.Write (expected);
-			Console.Write (", got ");
-			Console.WriteLine (currentLexeme);
+			StringBuilder errorOutput = new StringBuilder ();
+			errorOutput.Append ("Syntax error on row: ");
+			errorOutput.Append (curRow);
+			errorOutput.Append ("  column: ");
+			errorOutput.Append (curCol);
+			errorOutput.Append ("  Expected ");
+			errorOutput.Append (expected);
+			errorOutput.Append (", got ");
+			errorOutput.Append (currentLexeme);
+			string newError = errorOutput.ToString ();
+			errors.Add (newError);
 
 			hasError = true;
 
 			Peek ();
+		}
+
+		public void PrintErrors(){
+			for (int i = 0; i < errors.Count; i++){
+				Console.WriteLine ((string)errors[i]);
+			}
 		}
 	}
 }

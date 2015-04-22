@@ -7,7 +7,7 @@ namespace Compilers
 
 	public class SemanticAnalyzer
 	{
-		private ArrayList tables;
+		private SymbolTable tables;
 		private int tableNum;
 		private Stack operators;
 		private Stack operands;
@@ -15,31 +15,27 @@ namespace Compilers
 		private SType currentType;
 		private StringBuilder prog;
 
-		//private Stack D0;
-		//private Stack D1;
-		//private Stack D2;
-		//private Stack D3;
-		//private Stack D4;
-		//private Stack D5;
-		//private Stack D6;
-		//private Stack D7;
-		//private Stack D8;
-		//private Stack D9;
-
+		private ArrayList errors;
+		private bool semanticError;
 
 		public SemanticAnalyzer ()
 		{
-			tables = new ArrayList ();
+			//tables = new SymbolTable ();
 			prog = new StringBuilder ();
 			tableNum = 0;
 
 			operators = new Stack ();
 			operands = new Stack ();
 			operandType = new Stack ();
+
+			semanticError = false;
+			errors = new ArrayList ();
 		}
 
-		public void AddTable(SymbolTable in_table){
-			tables.Add (in_table);
+		public void AddTable(SymbolTable in_table, int in_tabnum){
+			//tables.Add (in_table);
+			tables = in_table;
+			tableNum = in_tabnum;
 		}
 
 		public void PassID(string id){
@@ -60,7 +56,8 @@ namespace Compilers
 
 		public void GenTable(){
 			//pushes a new symbol table on the stack
-			SymbolTable curr = (SymbolTable)tables[tableNum];
+			//SymbolTable curr = (SymbolTable)tables[tableNum];
+			SymbolTable curr = tables;
 
 			prog.Append ("PUSH D");
 			prog.Append (tableNum);
@@ -74,14 +71,35 @@ namespace Compilers
 		}
 
 		public void GenAssign(string target){
-			SymbolTable curr = (SymbolTable)tables[tableNum];
-			int cIndex = curr.GetOffset (target);
+			//SymbolTable curr = (SymbolTable)tables[tableNum];
+			//int cIndex = curr.GetOffset (target);
 
-			prog.Append ("POP ");
-			prog.Append (cIndex);
-			prog.Append ("(D");
-			prog.Append (tableNum);
-			prog.Append (")\n");
+			SymbolTable curr = tables;
+			int tableActual = tableNum;
+			int cIndex = -1;
+			bool keepSearching = true;
+			while (keepSearching) {
+				cIndex = curr.GetOffset (target);
+				if (cIndex != -1) {
+					keepSearching = false;
+				} else if (cIndex == -1 && curr.GetParent() != null) {
+					curr = curr.GetParent ();
+					tableActual = tableActual - 1;
+				} else {
+					keepSearching = false;
+					semanticError = true;
+				}
+			}
+
+			if(cIndex == -1){
+				ErrorMessage ();
+			} else {
+				prog.Append ("POP ");
+				prog.Append (cIndex);
+				prog.Append ("(D");
+				prog.Append (tableNum);
+				prog.Append (")\n");
+			}
 		}
 
 		public void GenArithmetic(){
@@ -112,17 +130,37 @@ namespace Compilers
 		}
 
 		public void GenPushID(string lex){
-			SymbolTable curr = (SymbolTable)tables[tableNum];
-			int cIndex = curr.GetOffset (lex);
-			TableRecord cRec = curr.GetRecord (cIndex);
-			string cType = cRec.Type ();
-			operandType.Push (cType);
+			//SymbolTable curr = (SymbolTable)tables[tableNum];
+			SymbolTable curr = tables;
+			int tableActual = tableNum;
+			int cIndex = -1;
+			bool keepSearching = true;
+			while (keepSearching) {
+				cIndex = curr.GetOffset (lex);
+				if (cIndex != -1) {
+					keepSearching = false;
+				} else if (cIndex == -1 && curr.GetParent() != null) {
+					curr = curr.GetParent ();
+					tableActual = tableActual - 1;
+				} else {
+					keepSearching = false;
+					semanticError = true;
+				}
+			}
 
-			prog.Append ("PUSH ");
-			prog.Append (cIndex);
-			prog.Append ("(D");
-			prog.Append (tableNum);
-			prog.Append (")\n");
+			if (cIndex == -1) {
+				ErrorMessage ();
+			} else {
+				TableRecord cRec = curr.GetRecord (cIndex);
+				string cType = cRec.Type ();
+				operandType.Push (cType);
+
+				prog.Append ("PUSH ");
+				prog.Append (cIndex);
+				prog.Append ("(D");
+				prog.Append (tableActual);
+				prog.Append (")\n");
+			}
 		}
 
 		public void GenPushLit(string lex,string type){
@@ -136,6 +174,10 @@ namespace Compilers
 		public void PrintCode(){
 			string code = prog.ToString ();
 			Console.Write (code);
+		}
+
+		public void ErrorMessage(){
+
 		}
 	}
 }

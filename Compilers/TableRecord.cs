@@ -24,9 +24,9 @@ namespace Compilers
 			parameters = new ArrayList ();
 		}
 
-		public void addParam(string in_mode,string in_type){
-			Parameter newParam = new Parameter (in_mode,in_type);
-			parameters.Add (newParam);
+		public void addParam(Parameter in_param){
+			//Parameter newParam = new Parameter (in_mode,in_type);
+			parameters.Add (in_param);
 		}
 
 		public int Size(){

@@ -11,6 +11,7 @@ namespace Compilers
 		int size;
 		string label;
 		ArrayList records;
+		SymbolTable parent;
 		Dictionary<string,int> lookUp;
 
 
@@ -45,6 +46,18 @@ namespace Compilers
 
 		public TableRecord GetRecord(int index){
 			return (TableRecord)records [index];
+		}
+
+		public void SetParent(SymbolTable in_parent){
+			parent = in_parent;
+		}
+
+		public SymbolTable GetParent(){
+			return parent;
+		}
+
+		public int GetDepth(){
+			return depth;
 		}
 	}
 }
