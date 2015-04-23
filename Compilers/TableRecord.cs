@@ -45,6 +45,10 @@ namespace Compilers
 			return type;
 		}
 
+		public void SetType(string in_type){
+			type = in_type;
+		}
+
 		public void printRecord(){
 			Console.Write (lexeme);
 			Console.Write (" ");

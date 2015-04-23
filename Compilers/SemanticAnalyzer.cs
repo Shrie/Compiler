@@ -102,6 +102,38 @@ namespace Compilers
 			}
 		}
 
+		public void GenRead(string target){
+			//SymbolTable curr = (SymbolTable)tables[tableNum];
+			//int cIndex = curr.GetOffset (target);
+
+			SymbolTable curr = tables;
+			int tableActual = tableNum;
+			int cIndex = -1;
+			bool keepSearching = true;
+			while (keepSearching) {
+				cIndex = curr.GetOffset (target);
+				if (cIndex != -1) {
+					keepSearching = false;
+				} else if (cIndex == -1 && curr.GetParent() != null) {
+					curr = curr.GetParent ();
+					tableActual = tableActual - 1;
+				} else {
+					keepSearching = false;
+					semanticError = true;
+				}
+			}
+
+			if(cIndex == -1){
+				ErrorMessage ();
+			} else {
+				prog.Append ("RD ");
+				prog.Append (cIndex);
+				prog.Append ("(D");
+				prog.Append (tableNum);
+				prog.Append (")\n");
+			}
+		}
+
 		public void GenArithmetic(){
 			string op = (string)operators.Pop ();
 			if (op == "+") {
@@ -162,6 +194,30 @@ namespace Compilers
 				prog.Append (")\n");
 			}
 		}
+
+		public void GenTearDown(){
+			SymbolTable curr = tables;
+
+			prog.Append ("SUB SP #");
+			prog.Append (curr.Size());
+			prog.Append (" SP\n");
+			prog.Append ("POP D");
+			prog.Append (tableNum);
+			prog.Append ("\n");
+		}
+
+		public void GenHalt (){
+			prog.Append ("HLT\n");
+		}
+
+		public void GenWrite(){
+			prog.Append ("WRTS\n");
+		}
+
+		public void GenWriteLine(){
+			prog.Append ("WRTLN \"\"\n");
+		}
+			
 
 		public void GenPushLit(string lex,string type){
 			operandType.Push (type);

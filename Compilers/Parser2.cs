@@ -102,6 +102,8 @@ namespace Compilers
 					PrintErrors ();
 				} else {
 					Console.WriteLine ("Program parsed successfully!");
+					annie.GenTearDown ();
+					annie.GenHalt ();
 					annie.PrintCode ();
 				}
 			} else if (hasError) {
@@ -161,11 +163,11 @@ namespace Compilers
 				Console.WriteLine ("Using rule 4");
 				VariableDeclarationPart ();
 
-				ProcedureAndFunctionDeclarationPart ();
-
 				//pass code to analyzer and gen code
 				annie.AddTable (currentTable, currentTable.GetDepth());
 				annie.GenTable ();
+
+				ProcedureAndFunctionDeclarationPart ();
 
 				StatementPart ();
 			} else {
@@ -407,6 +409,10 @@ namespace Compilers
 				}
 
 				Type ();
+
+				pfRecord.SetType (rType);
+				currentTable.AddRecord (pfRecord);
+				currentTable = nextTable;
 			} else {
 				errorMessage ("keyword 'function'");
 			}
@@ -696,6 +702,7 @@ namespace Compilers
 			if (ct == "MP_IDENTIFIER") {
 				//rule48
 				Console.WriteLine ("Using rule 48");
+				annie.GenRead (currentLexeme);
 				VariableIdentifier ();
 			} else {
 				errorMessage ("an identifier");
@@ -738,6 +745,8 @@ namespace Compilers
 
 				WriteParameterTail ();
 
+				annie.GenWriteLine ();
+
 				if (ct == "MP_RPAREN") {
 					Peek ();
 				} else {
@@ -771,6 +780,7 @@ namespace Compilers
 				//rule53
 				Console.WriteLine ("Using rule 53");
 				OrdinalExpression ();
+				annie.GenWrite ();
 			} else {
 				errorMessage ("a write parameter");
 			}
