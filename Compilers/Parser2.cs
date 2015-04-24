@@ -798,6 +798,10 @@ namespace Compilers
 
 				BooleanExpression ();
 
+				string elseLabel = labelMe.MakeLabel ();
+				string endLabel = labelMe.MakeLabel ();
+				annie.GenBranchConditional (elseLabel);
+
 				if (ct == "MP_THEN") {
 					Peek ();
 				} else {
@@ -805,8 +809,11 @@ namespace Compilers
 				}
 
 				Statement ();
+				annie.GenBranchUnconditional (endLabel);
+				annie.GenLabel (elseLabel);
 
 				OptionalElsePart ();
+				annie.GenLabel (endLabel);
 			} else {
 				errorMessage ("keyword 'if'");
 			}
@@ -1217,11 +1224,12 @@ namespace Compilers
 			} else if (ct == "MP_TRUE") {
 				//rule102
 				Console.WriteLine ("Using rule 102");
-				annie.GenPushLit (currentLexeme, "boolean");
+				annie.GenPushLit ("1", "bool");
 				Peek ();
 			} else if (ct == "MP_FALSE") {
 				//rule103
 				Console.WriteLine ("Using rule 103");
+				annie.GenPushLit ("0", "bool");
 				Peek ();
 			} else if (ct == "MP_NOT") {
 				//rule104

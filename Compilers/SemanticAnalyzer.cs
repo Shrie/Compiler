@@ -33,7 +33,6 @@ namespace Compilers
 		}
 
 		public void AddTable(SymbolTable in_table, int in_tabnum){
-			//tables.Add (in_table);
 			tables = in_table;
 			tableNum = in_tabnum;
 		}
@@ -70,8 +69,6 @@ namespace Compilers
 		}
 
 		public void GenAssign(string target){
-			//SymbolTable curr = (SymbolTable)tables[tableNum];
-			//int cIndex = curr.GetOffset (target);
 
 			SymbolTable curr = tables;
 			int tableActual = tableNum;
@@ -92,6 +89,7 @@ namespace Compilers
 
 			if(cIndex == -1){
 				ErrorMessage ();
+				semanticError = true;
 			} else {
 				string returnType = (string)operandType.Pop();
 				string targetType = tables.GetRecord (cIndex).Type();
@@ -101,8 +99,16 @@ namespace Compilers
 					prog.Append ("(D");
 					prog.Append (tableNum);
 					prog.Append (")\n");
+				} else if (returnType == "int" && targetType == "float"){ 
+					prog.Append ("CASTSI\n");
+					prog.Append ("POP ");
+					prog.Append (cIndex);
+					prog.Append ("(D");
+					prog.Append (tableNum);
+					prog.Append (")\n");
 				} else {
 					ErrorMessage ();
+					semanticError = true;
 				}
 			}
 		}
@@ -128,6 +134,7 @@ namespace Compilers
 
 			if(cIndex == -1){
 				ErrorMessage ();
+				semanticError = true;
 			} else {
 				string targetType = tables.GetRecord (cIndex).Type();
 				if (targetType == "int") {
@@ -150,6 +157,7 @@ namespace Compilers
 					prog.Append (")\n");
 				} else {
 					ErrorMessage ();
+					semanticError = true;
 				}
 			}
 		}
@@ -196,6 +204,7 @@ namespace Compilers
 					operandType.Push ("bool");
 				} else {
 					ErrorMessage ();
+					semanticError = true;
 				}
 			} else if (type1 == "float" && type2 == "float") {
 				string op = (string)operators.Pop ();
@@ -214,6 +223,7 @@ namespace Compilers
 				} else if (op == "mod") {
 					//prog.Append ("MODS\n");
 					ErrorMessage ();
+					semanticError = true;
 				} else if (op == "=") {
 					prog.Append ("CMPEQSF\n");
 					operandType.Push ("bool");
@@ -234,6 +244,7 @@ namespace Compilers
 					operandType.Push ("bool");
 				} else {
 					ErrorMessage ();
+					semanticError = true;
 				}
 			} else if (type1 == "int" && type2 == "float") {
 				prog.Append ("CASTSF\n");
@@ -254,6 +265,7 @@ namespace Compilers
 				} else if (op == "mod") {
 					//prog.Append ("MODS\n");
 					ErrorMessage ();
+					semanticError = true;
 				} else if (op == "=") {
 					prog.Append ("CMPEQSF\n");
 					operandType.Push ("bool");
@@ -274,6 +286,7 @@ namespace Compilers
 					operandType.Push ("bool");
 				} else {
 					ErrorMessage ();
+					semanticError = true;
 				}
 			} else if (type1 == "float" && type2 == "int") {
 				prog.Append ("POP 0(SP)\n");
@@ -296,6 +309,7 @@ namespace Compilers
 				} else if (op == "mod") {
 					//prog.Append ("MODS\n");
 					ErrorMessage ();
+					semanticError = true;
 				} else if (op == "=") {
 					prog.Append ("CMPEQSF\n");
 					operandType.Push ("bool");
@@ -316,6 +330,7 @@ namespace Compilers
 					operandType.Push ("bool");
 				} else {
 					ErrorMessage ();
+					semanticError = true;
 				}
 			} else if (type1 == "bool" && type2 == "bool") {
 				string op = (string)operators.Pop ();
@@ -328,14 +343,15 @@ namespace Compilers
 					operandType.Push ("bool");
 				} else {
 					ErrorMessage ();
+					semanticError = true;
 				}
 			} else {
 				ErrorMessage ();
+				semanticError = true;
 			}
 		}
 
 		public void GenPushID(string lex){
-			//SymbolTable curr = (SymbolTable)tables[tableNum];
 			SymbolTable curr = tables;
 			int tableActual = tableNum;
 			int cIndex = -1;
@@ -355,6 +371,7 @@ namespace Compilers
 
 			if (cIndex == -1) {
 				ErrorMessage ();
+				semanticError = true;
 			} else {
 				TableRecord cRec = curr.GetRecord (cIndex);
 				string cType = cRec.Type ();
@@ -400,9 +417,30 @@ namespace Compilers
 			prog.Append ("\n");
 		}
 
+		public void GenBranchConditional(string in_label){
+			prog.Append ("BRFS ");
+			prog.Append (in_label);
+			prog.Append ("\n");
+		}
+
+		public void GenLabel(string in_label){
+			prog.Append (in_label);
+			prog.Append (":\n");
+		}
+
+		public void GenBranchUnconditional(string in_label){
+			prog.Append ("BR ");
+			prog.Append (in_label);
+			prog.Append ("\n");
+		}
+
 		public void PrintCode(){
-			string code = prog.ToString ();
-			Console.Write (code);
+			if (semanticError) {
+				Console.WriteLine ("There are semantic errors! Oh no!");
+			} else {
+				string code = prog.ToString ();
+				Console.Write (code);
+			}
 		}
 
 		public void ErrorMessage(){
