@@ -56,7 +56,6 @@ namespace Compilers
 
 		public void GenTable(){
 			//pushes a new symbol table on the stack
-			//SymbolTable curr = (SymbolTable)tables[tableNum];
 			SymbolTable curr = tables;
 
 			prog.Append ("PUSH D");
@@ -94,17 +93,21 @@ namespace Compilers
 			if(cIndex == -1){
 				ErrorMessage ();
 			} else {
-				prog.Append ("POP ");
-				prog.Append (cIndex);
-				prog.Append ("(D");
-				prog.Append (tableNum);
-				prog.Append (")\n");
+				string returnType = (string)operandType.Pop();
+				string targetType = tables.GetRecord (cIndex).Type();
+				if (returnType == targetType) {
+					prog.Append ("POP ");
+					prog.Append (cIndex);
+					prog.Append ("(D");
+					prog.Append (tableNum);
+					prog.Append (")\n");
+				} else {
+					ErrorMessage ();
+				}
 			}
 		}
 
 		public void GenRead(string target){
-			//SymbolTable curr = (SymbolTable)tables[tableNum];
-			//int cIndex = curr.GetOffset (target);
 
 			SymbolTable curr = tables;
 			int tableActual = tableNum;
@@ -126,38 +129,208 @@ namespace Compilers
 			if(cIndex == -1){
 				ErrorMessage ();
 			} else {
-				prog.Append ("RD ");
-				prog.Append (cIndex);
-				prog.Append ("(D");
-				prog.Append (tableNum);
-				prog.Append (")\n");
+				string targetType = tables.GetRecord (cIndex).Type();
+				if (targetType == "int") {
+					prog.Append ("RD ");
+					prog.Append (cIndex);
+					prog.Append ("(D");
+					prog.Append (tableNum);
+					prog.Append (")\n");
+				} else if (targetType == "float") {
+					prog.Append ("RDF ");
+					prog.Append (cIndex);
+					prog.Append ("(D");
+					prog.Append (tableNum);
+					prog.Append (")\n");
+				} else if (targetType == "string") {
+					prog.Append ("RDS ");
+					prog.Append (cIndex);
+					prog.Append ("(D");
+					prog.Append (tableNum);
+					prog.Append (")\n");
+				} else {
+					ErrorMessage ();
+				}
 			}
 		}
 
 		public void GenArithmetic(){
-			string op = (string)operators.Pop ();
-			if (op == "+") {
-				prog.Append ("ADDS\n");
-			} else if (op == "-") {
-				prog.Append ("SUBS\n");
-			} else if (op == "*") {
-				prog.Append ("MULS\n");
-			} else if (op == "/" || op == "div") {
-				prog.Append ("DIVS\n");
-			} else if (op == "mod") {
-				prog.Append ("MODS\n");
-			} else if (op == "=") {
-				prog.Append ("CMPEQS\n");
-			} else if (op == "<") {
-				prog.Append ("CMPLTS\n");
-			} else if (op == ">") {
-				prog.Append ("CMPGTS\n");
-			} else if (op == "<=") {
-				prog.Append ("CMPLES\n");
-			} else if (op == ">=") {
-				prog.Append ("CMPGES\n");
-			} else if (op == "<>") {
-				prog.Append ("CMPNES\n");
+			string type1 = (string)operandType.Pop ();
+			string type2 = (string)operandType.Pop ();
+
+
+			if (type1 == "int" && type2 == "int") {
+				string op = (string)operators.Pop ();
+				if (op == "+") {
+					prog.Append ("ADDS\n");
+					operandType.Push ("int");
+				} else if (op == "-") {
+					prog.Append ("SUBS\n");
+					operandType.Push ("int");
+				} else if (op == "*") {
+					prog.Append ("MULS\n");
+					operandType.Push ("int");
+				} else if (op == "/" || op == "div") {
+					prog.Append ("DIVS\n");
+					operandType.Push ("int");
+				} else if (op == "mod") {
+					prog.Append ("MODS\n");
+					operandType.Push ("int");
+				} else if (op == "=") {
+					prog.Append ("CMPEQS\n");
+					operandType.Push ("bool");
+				} else if (op == "<") {
+					prog.Append ("CMPLTS\n");
+					operandType.Push ("bool");
+				} else if (op == ">") {
+					prog.Append ("CMPGTS\n");
+					operandType.Push ("bool");
+				} else if (op == "<=") {
+					prog.Append ("CMPLES\n");
+					operandType.Push ("bool");
+				} else if (op == ">=") {
+					prog.Append ("CMPGES\n");
+					operandType.Push ("bool");
+				} else if (op == "<>") {
+					prog.Append ("CMPNES\n");
+					operandType.Push ("bool");
+				} else {
+					ErrorMessage ();
+				}
+			} else if (type1 == "float" && type2 == "float") {
+				string op = (string)operators.Pop ();
+				if (op == "+") {
+					prog.Append ("ADDSF\n");
+					operandType.Push ("float");
+				} else if (op == "-") {
+					prog.Append ("SUBSF\n");
+					operandType.Push ("float");
+				} else if (op == "*") {
+					prog.Append ("MULSF\n");
+					operandType.Push ("float");
+				} else if (op == "/" || op == "div") {
+					prog.Append ("DIVSF\n");
+					operandType.Push ("float");
+				} else if (op == "mod") {
+					//prog.Append ("MODS\n");
+					ErrorMessage ();
+				} else if (op == "=") {
+					prog.Append ("CMPEQSF\n");
+					operandType.Push ("bool");
+				} else if (op == "<") {
+					prog.Append ("CMPLTSF\n");
+					operandType.Push ("bool");
+				} else if (op == ">") {
+					prog.Append ("CMPGTSF\n");
+					operandType.Push ("bool");
+				} else if (op == "<=") {
+					prog.Append ("CMPLESF\n");
+					operandType.Push ("bool");
+				} else if (op == ">=") {
+					prog.Append ("CMPGESF\n");
+					operandType.Push ("bool");
+				} else if (op == "<>") {
+					prog.Append ("CMPNESF\n");
+					operandType.Push ("bool");
+				} else {
+					ErrorMessage ();
+				}
+			} else if (type1 == "int" && type2 == "float") {
+				prog.Append ("CASTSF\n");
+
+				string op = (string)operators.Pop ();
+				if (op == "+") {
+					prog.Append ("ADDSF\n");
+					operandType.Push ("float");
+				} else if (op == "-") {
+					prog.Append ("SUBSF\n");
+					operandType.Push ("float");
+				} else if (op == "*") {
+					prog.Append ("MULSF\n");
+					operandType.Push ("float");
+				} else if (op == "/" || op == "div") {
+					prog.Append ("DIVSF\n");
+					operandType.Push ("float");
+				} else if (op == "mod") {
+					//prog.Append ("MODS\n");
+					ErrorMessage ();
+				} else if (op == "=") {
+					prog.Append ("CMPEQSF\n");
+					operandType.Push ("bool");
+				} else if (op == "<") {
+					prog.Append ("CMPLTSF\n");
+					operandType.Push ("bool");
+				} else if (op == ">") {
+					prog.Append ("CMPGTSF\n");
+					operandType.Push ("bool");
+				} else if (op == "<=") {
+					prog.Append ("CMPLESF\n");
+					operandType.Push ("bool");
+				} else if (op == ">=") {
+					prog.Append ("CMPGESF\n");
+					operandType.Push ("bool");
+				} else if (op == "<>") {
+					prog.Append ("CMPNESF\n");
+					operandType.Push ("bool");
+				} else {
+					ErrorMessage ();
+				}
+			} else if (type1 == "float" && type2 == "int") {
+				prog.Append ("POP 0(SP)\n");
+				prog.Append ("CASTSF\n");
+				prog.Append ("PUSH 0(SP)\n");
+
+				string op = (string)operators.Pop ();
+				if (op == "+") {
+					prog.Append ("ADDSF\n");
+					operandType.Push ("float");
+				} else if (op == "-") {
+					prog.Append ("SUBSF\n");
+					operandType.Push ("float");
+				} else if (op == "*") {
+					prog.Append ("MULSF\n");
+					operandType.Push ("float");
+				} else if (op == "/" || op == "div") {
+					prog.Append ("DIVSF\n");
+					operandType.Push ("float");
+				} else if (op == "mod") {
+					//prog.Append ("MODS\n");
+					ErrorMessage ();
+				} else if (op == "=") {
+					prog.Append ("CMPEQSF\n");
+					operandType.Push ("bool");
+				} else if (op == "<") {
+					prog.Append ("CMPLTSF\n");
+					operandType.Push ("bool");
+				} else if (op == ">") {
+					prog.Append ("CMPGTSF\n");
+					operandType.Push ("bool");
+				} else if (op == "<=") {
+					prog.Append ("CMPLESF\n");
+					operandType.Push ("bool");
+				} else if (op == ">=") {
+					prog.Append ("CMPGESF\n");
+					operandType.Push ("bool");
+				} else if (op == "<>") {
+					prog.Append ("CMPNESF\n");
+					operandType.Push ("bool");
+				} else {
+					ErrorMessage ();
+				}
+			} else if (type1 == "bool" && type2 == "bool") {
+				string op = (string)operators.Pop ();
+
+				if (op == "and") {
+					prog.Append ("ANDS\n");
+					operandType.Push ("bool");
+				} else if (op == "or") {
+					prog.Append ("ORS\n");
+					operandType.Push ("bool");
+				} else {
+					ErrorMessage ();
+				}
+			} else {
+				ErrorMessage ();
 			}
 		}
 
@@ -215,7 +388,7 @@ namespace Compilers
 		}
 
 		public void GenWriteLine(){
-			prog.Append ("WRTLN \"\"\n");
+			prog.Append ("WRTLN #\"\"\n");
 		}
 			
 
