@@ -418,9 +418,28 @@ namespace Compilers
 		}
 
 		public void GenBranchConditional(string in_label){
-			prog.Append ("BRFS ");
-			prog.Append (in_label);
-			prog.Append ("\n");
+
+			string cond = (string)operandType.Pop ();
+			if (cond == "bool") {
+				prog.Append ("BRFS ");
+				prog.Append (in_label);
+				prog.Append ("\n");
+			} else {
+				ErrorMessage ();
+				semanticError = true;
+			}
+		}
+
+		public void GenBranchConditionalT(string in_label){
+			string cond = (string)operandType.Pop ();
+			if (cond == "bool") {
+				prog.Append ("BRTS ");
+				prog.Append (in_label);
+				prog.Append ("\n");
+			} else {
+				ErrorMessage ();
+				semanticError = true;
+			}
 		}
 
 		public void GenLabel(string in_label){
@@ -434,9 +453,60 @@ namespace Compilers
 			prog.Append ("\n");
 		}
 
+		public void GenCompareEqual(string step){
+			string type1 = (string)operandType.Pop ();
+			string type2 = (string)operandType.Pop ();
+
+			if (step == "to") {
+				if (type1 == "int" && type2 == "int") {
+					prog.Append ("CMPLES\n");
+					operandType.Push ("bool");
+				} else if (type1 == "float" && type2 == "float") {
+					prog.Append ("CMPLESF\n");
+					operandType.Push ("bool");
+				} else if (type1 == "int" && type2 == "float") {
+					prog.Append ("CASTSF\n");
+					prog.Append ("CMPLESF\n");
+					operandType.Push ("bool");
+				} else if (type1 == "float" && type2 == "int") {
+					prog.Append ("POP 0(SP)\n");
+					prog.Append ("CASTSF\n");
+					prog.Append ("PUSH 0(SP)\n");
+					prog.Append ("CMPLESF\n");
+					operandType.Push ("bool");
+				} else {
+					ErrorMessage ();
+					semanticError = true;
+				}
+			} else {
+				if (type1 == "int" && type2 == "int") {
+					prog.Append ("CMPGES\n");
+					operandType.Push ("bool");
+				} else if (type1 == "float" && type2 == "float") {
+					prog.Append ("CMPGESF\n");
+					operandType.Push ("bool");
+				} else if (type1 == "int" && type2 == "float") {
+					prog.Append ("CASTSF\n");
+					prog.Append ("CMPGESF\n");
+					operandType.Push ("bool");
+				} else if (type1 == "float" && type2 == "int") {
+					prog.Append ("POP 0(SP)\n");
+					prog.Append ("CASTSF\n");
+					prog.Append ("PUSH 0(SP)\n");
+					prog.Append ("CMPGESF\n");
+					operandType.Push ("bool");
+				} else {
+					ErrorMessage ();
+					semanticError = true;
+				}
+			}
+		}
+
 		public void PrintCode(){
 			if (semanticError) {
 				Console.WriteLine ("There are semantic errors! Oh no!");
+				string code = prog.ToString ();
+				Console.Write (code);
 			} else {
 				string code = prog.ToString ();
 				Console.Write (code);

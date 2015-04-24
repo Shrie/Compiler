@@ -839,6 +839,9 @@ namespace Compilers
 				//rule59
 				Console.WriteLine ("Using rule 59");
 				Peek ();
+				string loopLabel = labelMe.MakeLabel ();
+				string endLabel = labelMe.MakeLabel ();
+				annie.GenLabel (loopLabel);
 
 				StatementSequence ();
 
@@ -849,6 +852,9 @@ namespace Compilers
 				}
 
 				BooleanExpression ();
+				annie.GenBranchConditionalT (endLabel);
+				annie.GenBranchUnconditional (loopLabel);
+				annie.GenLabel (endLabel);
 			} else {
 				errorMessage ("keyword 'repeat'");
 			}
@@ -859,8 +865,12 @@ namespace Compilers
 				//rule60
 				Console.WriteLine ("Using rule 60");
 				Peek ();
+				string loopLabel = labelMe.MakeLabel ();
+				string endLabel = labelMe.MakeLabel ();
+				annie.GenLabel (loopLabel);
 
 				BooleanExpression ();
+				annie.GenBranchConditional (endLabel);
 
 				if (ct == "MP_DO") {
 					Peek ();
@@ -869,6 +879,9 @@ namespace Compilers
 				}
 
 				Statement ();
+
+				annie.GenBranchUnconditional (loopLabel);
+				annie.GenLabel (endLabel);
 			} else {
 				errorMessage ("keyword 'while'");
 			}
@@ -879,7 +892,10 @@ namespace Compilers
 				//rule61
 				Console.WriteLine ("Using rule 61");
 				Peek ();
+				string loopLabel = labelMe.MakeLabel ();
+				string endLabel = labelMe.MakeLabel ();
 
+				string controlLex = currentLexeme;
 				ControlVariable ();
 
 				if (ct == "MP_ASSIGN") {
@@ -889,10 +905,16 @@ namespace Compilers
 				}
 
 				InitialValue ();
+				annie.GenAssign (controlLex);
+				annie.GenLabel (loopLabel);
 
+				string stepType = currentLexeme;
 				StepValue ();
 
+				annie.GenPushID (controlLex);
 				FinalValue ();
+				annie.GenCompareEqual (stepType);
+				annie.GenBranchConditional (endLabel);
 
 				if (ct == "MP_DO") {
 					Peek ();
@@ -901,6 +923,17 @@ namespace Compilers
 				}
 
 				Statement ();
+				annie.GenPushID (controlLex);
+				annie.GenPushLit ("1","int");
+				if (stepType == "to") {
+					annie.PassOp ("+");
+				} else {
+					annie.PassOp ("-");
+				}
+				annie.GenArithmetic ();
+				annie.GenAssign (controlLex);
+				annie.GenBranchUnconditional (loopLabel);
+				annie.GenLabel (endLabel);
 			} else {
 				errorMessage ("keyword 'for'");
 			}
