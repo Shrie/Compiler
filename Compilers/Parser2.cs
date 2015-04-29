@@ -529,8 +529,6 @@ namespace Compilers
 				while (rLexStack.Count != 0) {
 					rLex = (string)rLexStack.Pop ();
 					cRecord = new TableRecord (rLex, rType, rKind, rMode, rSize);
-					//cRecord.SetOffset (rOffset);
-					//rOffset++;
 					nextTable.AddRecord (cRecord);
 					Parameter fParam = new Parameter (rMode,rType);
 					tStack.Push (fParam);

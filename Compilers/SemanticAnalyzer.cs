@@ -114,7 +114,6 @@ namespace Compilers
 		}
 
 		public void GenRead(string target){
-
 			SymbolTable curr = tables;
 			int tableActual = tableNum;
 			int cIndex = -1;
@@ -510,6 +509,7 @@ namespace Compilers
 			} else {
 				string code = prog.ToString ();
 				Console.Write (code);
+				System.IO.File.WriteAllText (@".\programCode.il",code);
 			}
 		}
 

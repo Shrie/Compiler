@@ -12,14 +12,21 @@ namespace Compilers
 			//@"c:\users\Hunter\Desktop\compilers\test1.txt"
 			//@"c:\users\Austo89\Desktop\compilers\test1.txt"
 			//@"/Users/David/Desktop/test1.txt"
-			string contents = File.ReadAllText(@"c:\users\Austo89\Desktop\compilers\test1.txt");
-			string output = Scanner.Dispatcher (contents);
-			Scanner.PrintTokies ();
-			ArrayList outies = Scanner.GetTokenArray();
-			//.Write(output);
-			Console.WriteLine (output);
-			Parser2 testes = new Parser2 (output,outies);
-			testes.Parse ();
+			//string contents = File.ReadAllText(@"c:\users\Austo89\Desktop\compilers\test1.txt");
+			try{
+				string contents = File.ReadAllText(args[0]);
+				string output = Scanner.Dispatcher (contents);
+				Scanner.PrintTokies ();
+				ArrayList outies = Scanner.GetTokenArray();
+				//.Write(output);
+				Console.WriteLine (output);
+				Parser2 testes = new Parser2 (output,outies);
+				testes.Parse ();
+			} catch (IOException){
+				Console.WriteLine ("Couldn't open file.");
+			} catch (IndexOutOfRangeException){
+				Console.WriteLine ("Expecting a file argument.");
+			}
 		}
 	}
 }
