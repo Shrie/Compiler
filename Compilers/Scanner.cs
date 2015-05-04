@@ -402,23 +402,28 @@ namespace Compilers
 
 							//if it's an e or E, then it's a float
 							else if (comp2 == 69 || comp2 == 101) {
+
+								//the number already contained an e or E
+								//it's an error
 								if (is_float) {
-									//the number already contained an e or E
-									//it's an error
 									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
 									add_count = 0;
-								} else {
-									//mark the float flag
+								} 
+
+								//mark the float flag
+								else {
 									is_float = true;
 								}
+
 								//append the e or E to the lexeme
 								lexeme.Append ((char)check.Read ());
 
 								//make sure the next char is a digit or minus sign
 								int err_spot = check.Peek ();
 								if (err_spot == 45) {
+
 									//see if the minus sign is followed by a digit
 									lexeme.Append ((char)check.Read ());
 									add_count++;
@@ -426,6 +431,7 @@ namespace Compilers
 									if (err_spot2 >= 48 && err_spot2 <= 57) {
 										//found a digit, all is well
 									} else {
+
 										//not a digit, return an error
 										tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
 										is_num = false;
@@ -433,10 +439,12 @@ namespace Compilers
 										add_count = 0;
 									}
 								}
+
 								//check if the E is followed by a digit
 								else if (err_spot >= 48 && err_spot <= 57) {
 									//found a digit, everything checks out
 								} else {
+
 									//no digit, no token for you
 									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
 									is_num = false;
@@ -444,6 +452,7 @@ namespace Compilers
 									add_count = 0;
 								}
 							} else {
+
 								//reached the end of the number, check what kind of
 								//number it is based on the flags
 
@@ -460,13 +469,17 @@ namespace Compilers
 									column_counter += add_count;
 									add_count = 0;
 								}
+
 								//mark the next symbol as not part of the number
 								//exit the loop
 								is_num = false;
 							}
 						}
 
-					} else if (comp == 46) {
+					} 
+
+					//a series of single character tokens
+					else if (comp == 46) {
 						tokies.Add (new Token("MP_PERIOD",".",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 44) {
@@ -484,7 +497,11 @@ namespace Compilers
 					} else if (comp == 61) {
 						tokies.Add (new Token("MP_EQUAL","=",row_counter,column_counter));
 						column_counter++;
-					} else if (comp == 62) {
+					} 
+
+					//if the symbol starts with the ">" char it
+					//could be ">" or ">="
+					else if (comp == 62) {
 						int i62 = check.Peek ();
 						if (i62 == 61) {
 							int junk = check.Read ();
@@ -493,7 +510,11 @@ namespace Compilers
 						} else {
 							tokies.Add (new Token("MP_GTHAN",">",row_counter,column_counter));
 						} 
-					} else if (comp == 60) {
+					} 
+
+					//if the token starts with "<" it could be
+					//"<", "<=", or "<>"
+					else if (comp == 60) {
 						int i60 = check.Peek ();
 						if (i60 == 61) {
 							int junk = check.Read ();
@@ -506,7 +527,11 @@ namespace Compilers
 						} else {
 							tokies.Add (new Token("MP_LTHAN","<",row_counter,column_counter));
 						} 
-					} else if (comp == 58) {
+					} 
+
+					//if a tokens starts with ":" it could be
+					//a ":" or ":="
+					else if (comp == 58) {
 						int i58 = check.Peek ();
 						if (i58 == 61) {
 							int junk = check.Read ();
@@ -516,7 +541,10 @@ namespace Compilers
 							tokies.Add (new Token("MP_COLON",":",row_counter,column_counter));
 							column_counter++;
 						}
-					} else if (comp == 43) {
+					} 
+
+					//another series of single char tokens
+					else if (comp == 43) {
 						tokies.Add (new Token("MP_PLUS","+",row_counter,column_counter));
 						column_counter++;
 					} else if (comp == 47) { 
@@ -528,11 +556,15 @@ namespace Compilers
 					} else if (comp == 42) {
 						tokies.Add (new Token("MP_TIMES","*",row_counter,column_counter));
 						column_counter++;
-					} else {
+					} 
+
+					//if the char doesn't match any token, it's an error
+					else {
 						tokies.Add (new Token("MP_ERROR",comp.ToString(),row_counter,column_counter));
 						column_counter++;
 					}
 
+					//check if the next space is whitespace
 					white_space = Char.IsWhiteSpace ((char)check.Peek ());
 					if (check.Peek () == -1 || check.Peek() == 123 || check.Peek() == 39) {
 						white_space = true;
@@ -541,20 +573,26 @@ namespace Compilers
 				}
 			}
 
+			//return the series of tokens to the dispatcher
 			process = build.ToString ();
 			return process;
 		}
 
+		//returns the ArrayList of tokens
+
 		public static ArrayList GetTokenArray(){
 			return tokies;
 		}
+
+		//function to print out the arraylist of tokens
 
 		public static void PrintTokies(){
 			int i = 0;
 			while (i < tokies.Count) {
 				Token printTok = (Token)tokies [i];
 				Console.Write (String.Format ("{0,-16}{1,-20}{2,-5}{3,-5}{4,0}", 
-					printTok.GetName(), printTok.GetLex(), printTok.GetRow(), printTok.GetCol(), "\n"));
+					printTok.GetName(), printTok.GetLex(), printTok.GetRow(), 
+					printTok.GetCol(), "\n"));
 				i++;
 			}
 		}

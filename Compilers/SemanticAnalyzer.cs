@@ -7,6 +7,8 @@ namespace Compilers
 
 	public class SemanticAnalyzer
 	{
+		private Parser2 parse;
+
 		private SymbolTable tables;
 		private int tableNum;
 		private Stack operators;
@@ -15,11 +17,17 @@ namespace Compilers
 		private SType currentType;
 		private StringBuilder prog;
 
+		private string controlVar;
+
 		private ArrayList errors;
 		private bool semanticError;
 
-		public SemanticAnalyzer ()
+		private bool negFlag;
+
+		public SemanticAnalyzer (Parser2 in_parse)
 		{
+			parse = in_parse;
+
 			//tables = new SymbolTable ();
 			prog = new StringBuilder ();
 			tableNum = 0;
@@ -30,6 +38,8 @@ namespace Compilers
 
 			semanticError = false;
 			errors = new ArrayList ();
+
+			negFlag = false;
 		}
 
 		public void AddTable(SymbolTable in_table, int in_tabnum){
@@ -51,6 +61,10 @@ namespace Compilers
 
 		public void SetType(SType in_type){
 			currentType = in_type;
+		}
+
+		public void SetNeg(){
+			negFlag = true;
 		}
 
 		public void GenTable(){
@@ -87,8 +101,14 @@ namespace Compilers
 				}
 			}
 
+			if (target == controlVar) {
+				ErrorMessage ("Can't assign to the control variable.");
+				semanticError = true;
+			}
+
 			if(cIndex == -1){
-				ErrorMessage ();
+				ErrorMessage ("Identifier " + parse.currentLexeme + 
+					"doesn't exist in this scope.");
 				semanticError = true;
 			} else {
 				string returnType = (string)operandType.Pop();
@@ -107,7 +127,7 @@ namespace Compilers
 					prog.Append (tableNum);
 					prog.Append (")\n");
 				} else {
-					ErrorMessage ();
+					ErrorMessage ("Incompatible assignment types.");
 					semanticError = true;
 				}
 			}
@@ -132,7 +152,8 @@ namespace Compilers
 			}
 
 			if(cIndex == -1){
-				ErrorMessage ();
+				ErrorMessage ("Identifier " + parse.currentLexeme + 
+					"doesn't exist in this scope.");
 				semanticError = true;
 			} else {
 				string targetType = tables.GetRecord (cIndex).Type();
@@ -155,7 +176,7 @@ namespace Compilers
 					prog.Append (tableNum);
 					prog.Append (")\n");
 				} else {
-					ErrorMessage ();
+					ErrorMessage ("incompatible read type.");
 					semanticError = true;
 				}
 			}
@@ -202,7 +223,7 @@ namespace Compilers
 					prog.Append ("CMPNES\n");
 					operandType.Push ("bool");
 				} else {
-					ErrorMessage ();
+					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
 			} else if (type1 == "float" && type2 == "float") {
@@ -221,7 +242,7 @@ namespace Compilers
 					operandType.Push ("float");
 				} else if (op == "mod") {
 					//prog.Append ("MODS\n");
-					ErrorMessage ();
+					ErrorMessage ("Mod only works on integers.");
 					semanticError = true;
 				} else if (op == "=") {
 					prog.Append ("CMPEQSF\n");
@@ -242,7 +263,7 @@ namespace Compilers
 					prog.Append ("CMPNESF\n");
 					operandType.Push ("bool");
 				} else {
-					ErrorMessage ();
+					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
 			} else if (type1 == "int" && type2 == "float") {
@@ -263,7 +284,7 @@ namespace Compilers
 					operandType.Push ("float");
 				} else if (op == "mod") {
 					//prog.Append ("MODS\n");
-					ErrorMessage ();
+					ErrorMessage ("Mod only works on integers.");
 					semanticError = true;
 				} else if (op == "=") {
 					prog.Append ("CMPEQSF\n");
@@ -284,7 +305,7 @@ namespace Compilers
 					prog.Append ("CMPNESF\n");
 					operandType.Push ("bool");
 				} else {
-					ErrorMessage ();
+					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
 			} else if (type1 == "float" && type2 == "int") {
@@ -307,7 +328,7 @@ namespace Compilers
 					operandType.Push ("float");
 				} else if (op == "mod") {
 					//prog.Append ("MODS\n");
-					ErrorMessage ();
+					ErrorMessage ("Mod only works on integers.");
 					semanticError = true;
 				} else if (op == "=") {
 					prog.Append ("CMPEQSF\n");
@@ -328,7 +349,7 @@ namespace Compilers
 					prog.Append ("CMPNESF\n");
 					operandType.Push ("bool");
 				} else {
-					ErrorMessage ();
+					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
 			} else if (type1 == "bool" && type2 == "bool") {
@@ -341,11 +362,11 @@ namespace Compilers
 					prog.Append ("ORS\n");
 					operandType.Push ("bool");
 				} else {
-					ErrorMessage ();
+					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
 			} else {
-				ErrorMessage ();
+				ErrorMessage ("Incompatible types.");
 				semanticError = true;
 			}
 		}
@@ -369,7 +390,8 @@ namespace Compilers
 			}
 
 			if (cIndex == -1) {
-				ErrorMessage ();
+				ErrorMessage ("Identifier " + parse.currentLexeme + 
+					"doesn't exist in this scope.");
 				semanticError = true;
 			} else {
 				TableRecord cRec = curr.GetRecord (cIndex);
@@ -381,6 +403,22 @@ namespace Compilers
 				prog.Append ("(D");
 				prog.Append (tableActual);
 				prog.Append (")\n");
+
+
+				if (!negFlag) {
+					//do nothing
+				}
+				else if (negFlag && cType == "int") {
+					prog.Append ("NEGS\n");
+					negFlag = false;
+				} else if (negFlag && cType == "float") {
+					prog.Append ("NEGSF\n");
+					negFlag = false;
+				} else {
+					semanticError = true;
+					ErrorMessage ("Tried to negate an invalid type.");
+					negFlag = false;
+				}
 			}
 		}
 
@@ -414,6 +452,21 @@ namespace Compilers
 			prog.Append ("PUSH #");
 			prog.Append (lex);
 			prog.Append ("\n");
+
+			if (!negFlag) {
+				//do nothing
+			}
+			else if (negFlag && type == "int") {
+				prog.Append ("NEGS\n");
+				negFlag = false;
+			} else if (negFlag && type == "float") {
+				prog.Append ("NEGSF\n");
+				negFlag = false;
+			} else {
+				semanticError = true;
+				ErrorMessage ("Tried to negate an invalid type.");
+				negFlag = false;
+			}
 		}
 
 		public void GenBranchConditional(string in_label){
@@ -424,7 +477,7 @@ namespace Compilers
 				prog.Append (in_label);
 				prog.Append ("\n");
 			} else {
-				ErrorMessage ();
+				ErrorMessage ("Expecting type boolean.");
 				semanticError = true;
 			}
 		}
@@ -436,7 +489,7 @@ namespace Compilers
 				prog.Append (in_label);
 				prog.Append ("\n");
 			} else {
-				ErrorMessage ();
+				ErrorMessage ("Expecting type boolean.");
 				semanticError = true;
 			}
 		}
@@ -458,63 +511,97 @@ namespace Compilers
 
 			if (step == "to") {
 				if (type1 == "int" && type2 == "int") {
-					prog.Append ("CMPLES\n");
+					prog.Append ("CMPGES\n");
 					operandType.Push ("bool");
-				} else if (type1 == "float" && type2 == "float") {
-					prog.Append ("CMPLESF\n");
-					operandType.Push ("bool");
-				} else if (type1 == "int" && type2 == "float") {
-					prog.Append ("CASTSF\n");
-					prog.Append ("CMPLESF\n");
-					operandType.Push ("bool");
-				} else if (type1 == "float" && type2 == "int") {
-					prog.Append ("POP 0(SP)\n");
-					prog.Append ("CASTSF\n");
-					prog.Append ("PUSH 0(SP)\n");
-					prog.Append ("CMPLESF\n");
-					operandType.Push ("bool");
-				} else {
-					ErrorMessage ();
+				}  else {
+					ErrorMessage ("Control and initial value must be integers.");
 					semanticError = true;
 				}
 			} else {
 				if (type1 == "int" && type2 == "int") {
-					prog.Append ("CMPGES\n");
+					prog.Append ("CMPLES\n");
 					operandType.Push ("bool");
-				} else if (type1 == "float" && type2 == "float") {
-					prog.Append ("CMPGESF\n");
-					operandType.Push ("bool");
-				} else if (type1 == "int" && type2 == "float") {
-					prog.Append ("CASTSF\n");
-					prog.Append ("CMPGESF\n");
-					operandType.Push ("bool");
-				} else if (type1 == "float" && type2 == "int") {
-					prog.Append ("POP 0(SP)\n");
-					prog.Append ("CASTSF\n");
-					prog.Append ("PUSH 0(SP)\n");
-					prog.Append ("CMPGESF\n");
-					operandType.Push ("bool");
-				} else {
-					ErrorMessage ();
+				}  else {
+					ErrorMessage ("Control and initial value must be integers.");
 					semanticError = true;
 				}
 			}
+		}
+
+		public void GenNot(){
+			string type = (string)operandType.Pop ();
+
+			if (type == "bool") {
+				prog.Append ("NOTS\n");
+				operandType.Push ("bool");
+			} else {
+				ErrorMessage ("Performed NOT on a non-boolean.");
+				semanticError = true;
+			}
+		}
+
+		public void GenStackDup(){
+			prog.Append ("PUSH -1(SP)\n");
+		}
+
+		public void GenStackSub(){
+			prog.Append ("SUB SP #1 SP\n");
+		}
+
+		public void SetControlVariable(string in_var){
+			controlVar = in_var;
+		}
+
+		public void ReleaseControlVariable(){
+			controlVar = "null";
 		}
 
 		public void PrintCode(){
 			if (semanticError) {
 				Console.WriteLine ("There are semantic errors! Oh no!");
-				string code = prog.ToString ();
-				Console.Write (code);
+				StringBuilder bob = new StringBuilder ();
+				int i = 0;
+				while(i < errors.Count){
+					bob.Append ((string)errors[i]);
+					i++;
+				}
+				string errorString = bob.ToString ();
+				System.IO.File.WriteAllText (@".\errorReport.txt",errorString);
 			} else {
 				string code = prog.ToString ();
 				Console.Write (code);
-				System.IO.File.WriteAllText (@".\programCode.il",code);
+				string[] codeLines = code.Split ("\n".ToCharArray(), 10000);
+				System.IO.File.WriteAllLines (@".\programCode.il",codeLines);
 			}
 		}
 
-		public void ErrorMessage(){
+		//function to add error messages to output
 
+		public void ErrorMessage (string errorType){
+
+			//build an error string and add it to the error Array
+			StringBuilder tom = new StringBuilder ();
+			tom.Append ("Encountered a semantic error.\n");
+			tom.Append (errorType);
+			tom.Append (" at row: ");
+			tom.Append (parse.curRow);
+			tom.Append (", Col: ");
+			tom.Append (parse.curCol);
+			tom.Append ("\n");
+			string errOut = tom.ToString ();
+			errors.Add (errOut);
+		}
+
+		//function prints error messages
+
+		public void ErrorPrint(){
+
+			//for every error message in the array, print
+			int i = 0;
+			while(i < errors.Count){
+				Console.Write ((string)errors[i]);
+				i++;
+			}
 		}
 	}
 }

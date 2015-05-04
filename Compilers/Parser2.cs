@@ -29,10 +29,10 @@ namespace Compilers
 		private Stack rLexStack;
 
 		private StringReader tokens;
-		private string currentLexeme;
+		public string currentLexeme;
 		private string ct;
-		private int curCol;
-		private int curRow;
+		public int curCol;
+		public int curRow;
 		private ArrayList tokes;
 		private int tokePoint;
 
@@ -48,7 +48,7 @@ namespace Compilers
 			tokes = tokes_in;
 			tokePoint = 0;
 
-			annie = new SemanticAnalyzer ();
+			annie = new SemanticAnalyzer (this);
 			assignFlag = false;
 
 			depth = 0;
@@ -904,13 +904,17 @@ namespace Compilers
 
 				InitialValue ();
 				annie.GenAssign (controlLex);
-				annie.GenLabel (loopLabel);
+
+				annie.SetControlVariable (controlLex);
 
 				string stepType = currentLexeme;
 				StepValue ();
 
-				annie.GenPushID (controlLex);
 				FinalValue ();
+
+				annie.GenLabel (loopLabel);
+				annie.GenStackDup ();
+				annie.GenPushID (controlLex);
 				annie.GenCompareEqual (stepType);
 				annie.GenBranchConditional (endLabel);
 
@@ -921,6 +925,7 @@ namespace Compilers
 				}
 
 				Statement ();
+				annie.ReleaseControlVariable ();
 				annie.GenPushID (controlLex);
 				annie.GenPushLit ("1","int");
 				if (stepType == "to") {
@@ -932,6 +937,7 @@ namespace Compilers
 				annie.GenAssign (controlLex);
 				annie.GenBranchUnconditional (loopLabel);
 				annie.GenLabel (endLabel);
+				annie.GenStackSub ();
 			} else {
 				errorMessage ("keyword 'for'");
 			}
@@ -1005,7 +1011,7 @@ namespace Compilers
 			} else if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL" || ct == "MP_EQUAL" || ct == "MP_LTHAN" ||
 				ct == "MP_GTHAN" || ct == "MP_LEQUAL" || ct == "MP_GEQUAL" || ct == "MP_NEQUAL" || ct == "MP_PLUS" || 
 				ct == "MP_TIMES" || ct == "MP_MINUS" || ct == "MP_DIVIDE" || ct == "MP_DIV" || ct == "MP_AND" ||
-				ct == "MP_OR" || ct == "MP_DO" || ct == "MP_COMMA" || ct == "MP_RPAREN" || ct == "MP_SCOLON") {
+				ct == "MP_OR" || ct == "MP_DO" || ct == "MP_COMMA" || ct == "MP_RPAREN" || ct == "MP_SCOLON" || ct == "MP_THEN") {
 				//rule69 - lambda
 				Console.WriteLine ("Using rule 69");
 			} else {
@@ -1148,6 +1154,7 @@ namespace Compilers
 				//rule86
 				Console.WriteLine ("Using rule 86");
 				Peek ();
+				annie.SetNeg ();
 			} else if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
 			           ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN") {
 				//rule87 - lambda
@@ -1268,6 +1275,7 @@ namespace Compilers
 				Peek ();
 
 				Factor ();
+				annie.GenNot ();
 			} else if (ct == "MP_LPAREN") {
 				//rule105
 				Console.WriteLine ("Using rule 105");
