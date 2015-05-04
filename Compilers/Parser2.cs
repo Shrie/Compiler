@@ -9,6 +9,7 @@ namespace Compilers
 	{
 		private bool hasError;
 		private ArrayList errors;
+		public string fileName;
 
 		private LabelMaker labelMe;
 
@@ -39,7 +40,7 @@ namespace Compilers
 		private SemanticAnalyzer annie;
 		private bool assignFlag;
 
-		public Parser2 (string tokens_in, ArrayList tokes_in)
+		public Parser2 (string tokens_in, ArrayList tokes_in, string inFile)
 		{
 			hasError = false;
 			errors = new ArrayList ();
@@ -57,7 +58,9 @@ namespace Compilers
 
 			rLexStack = new Stack ();
 			rMode = "null";
-			//rOffset = 0;
+
+			fileName = inFile;
+			fileName = fileName.Replace (".up","");
 		}
 
 		public void Peek(){

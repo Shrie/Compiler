@@ -20,10 +20,12 @@ namespace Compilers
 				string contents = File.ReadAllText(args[0]);
 				string output = Scanner.Dispatcher (contents);
 				Scanner.PrintTokies ();
+
 				ArrayList outies = Scanner.GetTokenArray();
 				Console.WriteLine (output);
-				Parser2 testes = new Parser2 (output,outies);
-				testes.Parse ();
+
+				Parser2 parser = new Parser2 (output,outies, args[0]);
+				parser.Parse ();
 			} catch (IOException){
 				Console.WriteLine ("Couldn't open file.");
 			} catch (IndexOutOfRangeException){

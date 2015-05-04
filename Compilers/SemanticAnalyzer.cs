@@ -571,7 +571,7 @@ namespace Compilers
 				string code = prog.ToString ();
 				Console.Write (code);
 				string[] codeLines = code.Split ("\n".ToCharArray(), 10000);
-				System.IO.File.WriteAllLines (@".\programCode.il",codeLines);
+				System.IO.File.WriteAllLines (@".\" + parse.fileName +".il",codeLines);
 			}
 		}
 
