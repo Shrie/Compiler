@@ -5,10 +5,16 @@ using System.IO;
 
 namespace Compilers
 {
+
+	//second attempt at a working parser.
+	//the first one had issues.
+
 	public class Parser2
 	{
+		//instance variables
 		private bool hasError;
 		private ArrayList errors;
+
 		public string fileName;
 
 		private LabelMaker labelMe;
@@ -26,7 +32,6 @@ namespace Compilers
 		private string rKind;
 		private string rMode;
 		private int rSize;
-		//private int rOffset;
 		private Stack rLexStack;
 
 		private StringReader tokens;
@@ -40,8 +45,11 @@ namespace Compilers
 		private SemanticAnalyzer annie;
 		private bool assignFlag;
 
+		//Parser constructor
+
 		public Parser2 (string tokens_in, ArrayList tokes_in, string inFile)
 		{
+			//initialize variables
 			hasError = false;
 			errors = new ArrayList ();
 
@@ -63,7 +71,12 @@ namespace Compilers
 			fileName = fileName.Replace (".up","");
 		}
 
+		//look at the next token in the stream
+
 		public void Peek(){
+
+			// check if to make sure it's not
+			// the last token
 			if (tokePoint < tokes.Count) {
 				ct = ((Token)tokes[tokePoint]).GetName();
 				currentLexeme = ((Token)tokes[tokePoint]).GetLex();
@@ -77,11 +90,12 @@ namespace Compilers
 
 				tokePoint++;
 
+				//ignore comments
 				if(ct == "MP_COMMENT"){
 					Peek ();
 				}
 
-
+			// didn't find EOF
 			} else {
 				Console.WriteLine ("Out of tokens.");
 			}
@@ -92,28 +106,45 @@ namespace Compilers
 			Peek ();
 
 			//start with the SystemGoal rule 1
+			//check for the first token 'program'
 			if (ct == "MP_PROGRAM") {
 				Console.WriteLine ("Using rule 1");
+
+				//expand non-terminal <program>
 				Program ();
 			} else {
 				errorMessage ("keyword 'program'");
 			}
 
+			//check for token EOF
 			if (ct == "MP_EOF"){
+
+				//throw error messages
 				if (hasError) {
 					Console.WriteLine ("Parse failed!!! What have you done!?");
 					PrintErrors ();
-				} else {
+				} 
+
+				//parse successful, print code
+				else {
 					Console.WriteLine ("Program parsed successfully!");
 					annie.GenTearDown ();
 					annie.GenHalt ();
 					annie.PrintCode ();
 				}
-			} else if (hasError) {
+			} 
+
+			// not EOF, throw errors
+			else if (hasError) {
 				Console.WriteLine ("Parse failed!!! What have you done!?");
 				PrintErrors ();
 			}
 		}
+
+		// the following functions are based on
+		// non-terminals from the grammar.
+		// Expand the non-terminal based on the next
+		// symbol in the stream.
 
 		public void Program(){
 			if (ct == "MP_PROGRAM") {
@@ -245,8 +276,6 @@ namespace Compilers
 				while (rLexStack.Count != 0) {
 					rLex = (string)rLexStack.Pop ();
 					cRecord = new TableRecord (rLex, rType, rKind, rMode, rSize);
-					//cRecord.SetOffset (rOffset);
-					//rOffset++;
 					currentTable.AddRecord (cRecord);
 				}
 			} else {
@@ -255,6 +284,7 @@ namespace Compilers
 		}
 
 		public void Type(){
+			// set the variable type based on token
 			if (ct == "MP_INTEGER") {
 				//rule10
 				Console.WriteLine ("Using rule 10");
@@ -364,6 +394,8 @@ namespace Compilers
 				//rule19
 				Console.WriteLine ("Using rule 19");
 				Peek ();
+
+				//additional symbol table
 				string labelIt = labelMe.MakeLabel ();
 				nextTable = new SymbolTable (currentLexeme, depth, labelIt);
 				depth++;
@@ -378,6 +410,7 @@ namespace Compilers
 
 				OptionalFormalParameterList ();
 
+				//build a new table record
 				currentTable.AddRecord (pfRecord);
 				currentTable = nextTable;
 			} else {
@@ -395,6 +428,7 @@ namespace Compilers
 				nextTable = new SymbolTable (currentLexeme, depth, labelIt);
 				depth++;
 
+				//set table information
 				rKind = "function";
 				rSize = 0;
 				rLex = currentLexeme;
@@ -413,6 +447,7 @@ namespace Compilers
 
 				Type ();
 
+				//set new record
 				pfRecord.SetType (rType);
 				currentTable.AddRecord (pfRecord);
 				currentTable = nextTable;
@@ -491,12 +526,11 @@ namespace Compilers
 
 				Type ();
 
+				//build records into a table
 				Stack tStack = new Stack ();
 				while (rLexStack.Count != 0) {
 					rLex = (string)rLexStack.Pop ();
 					cRecord = new TableRecord (rLex, rType, rKind, rMode, rSize);
-					//cRecord.SetOffset (rOffset);
-					//rOffset++;
 					nextTable.AddRecord (cRecord);
 					Parameter pParam = new Parameter (rMode,rType);
 					tStack.Push (pParam);
@@ -528,6 +562,7 @@ namespace Compilers
 
 				Type ();
 
+				//build records for a symbol table
 				Stack tStack = new Stack ();
 				while (rLexStack.Count != 0) {
 					rLex = (string)rLexStack.Pop ();
@@ -746,6 +781,8 @@ namespace Compilers
 
 				WriteParameterTail ();
 
+				// gen a new line in the
+				// machine code
 				annie.GenWriteLine ();
 
 				if (ct == "MP_RPAREN") {
@@ -1014,7 +1051,8 @@ namespace Compilers
 			} else if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL" || ct == "MP_EQUAL" || ct == "MP_LTHAN" ||
 				ct == "MP_GTHAN" || ct == "MP_LEQUAL" || ct == "MP_GEQUAL" || ct == "MP_NEQUAL" || ct == "MP_PLUS" || 
 				ct == "MP_TIMES" || ct == "MP_MINUS" || ct == "MP_DIVIDE" || ct == "MP_DIV" || ct == "MP_AND" ||
-				ct == "MP_OR" || ct == "MP_DO" || ct == "MP_COMMA" || ct == "MP_RPAREN" || ct == "MP_SCOLON" || ct == "MP_THEN") {
+				ct == "MP_OR" || ct == "MP_DO" || ct == "MP_COMMA" || ct == "MP_RPAREN" || ct == "MP_SCOLON" || 
+				ct == "MP_THEN" || ct == "MP_MOD" || ct == "MP_TO" || ct == "MP_DOWNTO") {
 				//rule69 - lambda
 				Console.WriteLine ("Using rule 69");
 			} else {

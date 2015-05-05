@@ -120,7 +120,7 @@ namespace Compilers
 					prog.Append (tableNum);
 					prog.Append (")\n");
 				} else if (returnType == "int" && targetType == "float"){ 
-					prog.Append ("CASTSI\n");
+					prog.Append ("CASTSF\n");
 					prog.Append ("POP ");
 					prog.Append (cIndex);
 					prog.Append ("(D");
