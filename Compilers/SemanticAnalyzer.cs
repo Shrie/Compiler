@@ -1,4 +1,10 @@
-﻿using System;
+﻿// The Semantic Analyzer class accepts
+// Semantic records as input from the Parser
+// and generates working machine code that
+// is functionally equivalent to the original
+// microPascal input
+
+using System;
 using System.Collections;
 using System.Text;
 
@@ -7,6 +13,7 @@ namespace Compilers
 
 	public class SemanticAnalyzer
 	{
+		// instance variables
 		private Parser2 parse;
 
 		private SymbolTable tables;
@@ -23,6 +30,8 @@ namespace Compilers
 		private bool semanticError;
 
 		private bool negFlag;
+
+		// Constructor
 
 		public SemanticAnalyzer (Parser2 in_parse)
 		{
@@ -42,30 +51,47 @@ namespace Compilers
 			negFlag = false;
 		}
 
+		// Add a table to the symbol table collection
+
 		public void AddTable(SymbolTable in_table, int in_tabnum){
 			tables = in_table;
 			tableNum = in_tabnum;
 		}
 
+		// Allows passing of identifiers as operands
+
 		public void PassID(string id){
 			operands.Push (id);
 		}
+
+		// Allows passing of literals
 
 		public void PassNum(string lex,string type){
 			operands.Push (lex);
 		}
 
+		// Allows passing of operations
+
 		public void PassOp(string op){
 			operators.Push (op);
 		}
+
+		// This might be deprecated
 
 		public void SetType(SType in_type){
 			currentType = in_type;
 		}
 
+		// Tells us the next value is to be
+		// negated
+
 		public void SetNeg(){
 			negFlag = true;
 		}
+
+		// Function call to build code for a
+		// new symbol table
+		// Called when entering a new scope
 
 		public void GenTable(){
 			//pushes a new symbol table on the stack
@@ -82,12 +108,16 @@ namespace Compilers
 			prog.Append (" SP\n");
 		}
 
+		// Function to make code for an assignment
+
 		public void GenAssign(string target){
 
 			SymbolTable curr = tables;
 			int tableActual = tableNum;
 			int cIndex = -1;
 			bool keepSearching = true;
+
+			// Search symbol tables for the identifier
 			while (keepSearching) {
 				cIndex = curr.GetOffset (target);
 				if (cIndex != -1) {
@@ -101,25 +131,32 @@ namespace Compilers
 				}
 			}
 
+			// If it's the control var, throw an error
 			if (target == controlVar) {
 				ErrorMessage ("Can't assign to the control variable.");
 				semanticError = true;
 			}
 
 			if(cIndex == -1){
+				// Didn't find the id in the symbol tables
 				ErrorMessage ("Identifier " + parse.currentLexeme + 
 					"doesn't exist in this scope.");
 				semanticError = true;
 			} else {
+				// Found it, generate assign code
 				string returnType = (string)operandType.Pop();
 				string targetType = tables.GetRecord (cIndex).Type();
+
+				// Correct type, make assign
 				if (returnType == targetType) {
 					prog.Append ("POP ");
 					prog.Append (cIndex);
 					prog.Append ("(D");
 					prog.Append (tableNum);
 					prog.Append (")\n");
-				} else if (returnType == "int" && targetType == "float"){ 
+				} 
+				// Widening conversion, then assign
+				else if (returnType == "int" && targetType == "float"){ 
 					prog.Append ("CASTSF\n");
 					prog.Append ("POP ");
 					prog.Append (cIndex);
@@ -127,17 +164,22 @@ namespace Compilers
 					prog.Append (tableNum);
 					prog.Append (")\n");
 				} else {
+					// Type mismatch
 					ErrorMessage ("Incompatible assignment types.");
 					semanticError = true;
 				}
 			}
 		}
 
+		// Create code for a Read statement
+
 		public void GenRead(string target){
 			SymbolTable curr = tables;
 			int tableActual = tableNum;
 			int cIndex = -1;
 			bool keepSearching = true;
+
+			// Search symbol tables for id
 			while (keepSearching) {
 				cIndex = curr.GetOffset (target);
 				if (cIndex != -1) {
@@ -151,25 +193,32 @@ namespace Compilers
 				}
 			}
 
+			// Couldn't find the id in the symbol tables
 			if(cIndex == -1){
 				ErrorMessage ("Identifier " + parse.currentLexeme + 
 					"doesn't exist in this scope.");
 				semanticError = true;
 			} else {
 				string targetType = tables.GetRecord (cIndex).Type();
+
+				// Make a read int
 				if (targetType == "int") {
 					prog.Append ("RD ");
 					prog.Append (cIndex);
 					prog.Append ("(D");
 					prog.Append (tableNum);
 					prog.Append (")\n");
-				} else if (targetType == "float") {
+				} 
+				// Make a read float
+				else if (targetType == "float") {
 					prog.Append ("RDF ");
 					prog.Append (cIndex);
 					prog.Append ("(D");
 					prog.Append (tableNum);
 					prog.Append (")\n");
-				} else if (targetType == "string") {
+				} 
+				// Make a read string
+				else if (targetType == "string") {
 					prog.Append ("RDS ");
 					prog.Append (cIndex);
 					prog.Append ("(D");
@@ -182,11 +231,13 @@ namespace Compilers
 			}
 		}
 
+		// Create code for arithmetic
+
 		public void GenArithmetic(){
 			string type1 = (string)operandType.Pop ();
 			string type2 = (string)operandType.Pop ();
 
-
+			// Both are ints, no problem
 			if (type1 == "int" && type2 == "int") {
 				string op = (string)operators.Pop ();
 				if (op == "+") {
@@ -226,7 +277,9 @@ namespace Compilers
 					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
-			} else if (type1 == "float" && type2 == "float") {
+			} 
+			// Both are floats, no problem
+			else if (type1 == "float" && type2 == "float") {
 				string op = (string)operators.Pop ();
 				if (op == "+") {
 					prog.Append ("ADDSF\n");
@@ -241,7 +294,6 @@ namespace Compilers
 					prog.Append ("DIVSF\n");
 					operandType.Push ("float");
 				} else if (op == "mod") {
-					//prog.Append ("MODS\n");
 					ErrorMessage ("Mod only works on integers.");
 					semanticError = true;
 				} else if (op == "=") {
@@ -266,7 +318,9 @@ namespace Compilers
 					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
-			} else if (type1 == "int" && type2 == "float") {
+			} 
+			// One int and one float, cast int to float
+			else if (type1 == "int" && type2 == "float") {
 				prog.Append ("CASTSF\n");
 
 				string op = (string)operators.Pop ();
@@ -283,7 +337,6 @@ namespace Compilers
 					prog.Append ("DIVSF\n");
 					operandType.Push ("float");
 				} else if (op == "mod") {
-					//prog.Append ("MODS\n");
 					ErrorMessage ("Mod only works on integers.");
 					semanticError = true;
 				} else if (op == "=") {
@@ -327,7 +380,6 @@ namespace Compilers
 					prog.Append ("DIVSF\n");
 					operandType.Push ("float");
 				} else if (op == "mod") {
-					//prog.Append ("MODS\n");
 					ErrorMessage ("Mod only works on integers.");
 					semanticError = true;
 				} else if (op == "=") {
@@ -352,7 +404,9 @@ namespace Compilers
 					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
-			} else if (type1 == "bool" && type2 == "bool") {
+			} 
+			// Both are boolean, only works for certain operations
+			else if (type1 == "bool" && type2 == "bool") {
 				string op = (string)operators.Pop ();
 
 				if (op == "and") {
@@ -365,17 +419,23 @@ namespace Compilers
 					ErrorMessage ("Operator incompatible with types.");
 					semanticError = true;
 				}
-			} else {
+			} 
+			// Type mismatch
+			else {
 				ErrorMessage ("Incompatible types.");
 				semanticError = true;
 			}
 		}
+
+		// Build code to push an identifier on the stack
 
 		public void GenPushID(string lex){
 			SymbolTable curr = tables;
 			int tableActual = tableNum;
 			int cIndex = -1;
 			bool keepSearching = true;
+
+			// Search the symbol tables for the id
 			while (keepSearching) {
 				cIndex = curr.GetOffset (lex);
 				if (cIndex != -1) {
@@ -389,11 +449,15 @@ namespace Compilers
 				}
 			}
 
+			// Couldn't find it
 			if (cIndex == -1) {
 				ErrorMessage ("Identifier " + parse.currentLexeme + 
 					"doesn't exist in this scope.");
 				semanticError = true;
-			} else {
+			} 
+
+			// Did find it, push it
+			else {
 				TableRecord cRec = curr.GetRecord (cIndex);
 				string cType = cRec.Type ();
 				operandType.Push (cType);
@@ -422,6 +486,8 @@ namespace Compilers
 			}
 		}
 
+		// Code for tearing down a scope
+
 		public void GenTearDown(){
 			SymbolTable curr = tables;
 
@@ -433,18 +499,25 @@ namespace Compilers
 			prog.Append ("\n");
 		}
 
+		// Code that goes at the end of every program
+
 		public void GenHalt (){
 			prog.Append ("HLT\n");
 		}
+
+		// Code to write stack
 
 		public void GenWrite(){
 			prog.Append ("WRTS\n");
 		}
 
+		// Code to make a new line
+
 		public void GenWriteLine(){
 			prog.Append ("WRTLN #\"\"\n");
 		}
 			
+		// Code to push a literal on the stack
 
 		public void GenPushLit(string lex,string type){
 			operandType.Push (type);
@@ -456,6 +529,8 @@ namespace Compilers
 			if (!negFlag) {
 				//do nothing
 			}
+
+			// Add it's type to the type stack
 			else if (negFlag && type == "int") {
 				prog.Append ("NEGS\n");
 				negFlag = false;
@@ -468,6 +543,8 @@ namespace Compilers
 				negFlag = false;
 			}
 		}
+
+		// Code for branching, used by ifs and loops
 
 		public void GenBranchConditional(string in_label){
 
@@ -482,6 +559,9 @@ namespace Compilers
 			}
 		}
 
+		// Code for conditional branches on true,
+		// used by the repeat statement
+
 		public void GenBranchConditionalT(string in_label){
 			string cond = (string)operandType.Pop ();
 			if (cond == "bool") {
@@ -494,16 +574,22 @@ namespace Compilers
 			}
 		}
 
+		// Code for a new label
+
 		public void GenLabel(string in_label){
 			prog.Append (in_label);
 			prog.Append (":\n");
 		}
+
+		// Code for an unconditional branch
 
 		public void GenBranchUnconditional(string in_label){
 			prog.Append ("BR ");
 			prog.Append (in_label);
 			prog.Append ("\n");
 		}
+
+		// Code for a for-loop, to check end condition
 
 		public void GenCompareEqual(string step){
 			string type1 = (string)operandType.Pop ();
@@ -514,7 +600,8 @@ namespace Compilers
 					prog.Append ("CMPGES\n");
 					operandType.Push ("bool");
 				}  else {
-					ErrorMessage ("Control and initial value must be integers.");
+					ErrorMessage ("Control and initial " +
+						"value must be integers.");
 					semanticError = true;
 				}
 			} else {
@@ -522,11 +609,14 @@ namespace Compilers
 					prog.Append ("CMPLES\n");
 					operandType.Push ("bool");
 				}  else {
-					ErrorMessage ("Control and initial value must be integers.");
+					ErrorMessage ("Control and initial value must " +
+						"be integers.");
 					semanticError = true;
 				}
 			}
 		}
+
+		// Code to flip a boolean value
 
 		public void GenNot(){
 			string type = (string)operandType.Pop ();
@@ -540,9 +630,13 @@ namespace Compilers
 			}
 		}
 
+		// Code to handle for-loop final value
+
 		public void GenStackDup(){
 			prog.Append ("PUSH -1(SP)\n");
 		}
+
+		// Code to remove for-loop final value
 
 		public void GenStackSub(){
 			prog.Append ("SUB SP #1 SP\n");
@@ -556,7 +650,11 @@ namespace Compilers
 			controlVar = "null";
 		}
 
+		// Function to print out the code generated
+
 		public void PrintCode(){
+
+			// If there are errors, don't print
 			if (semanticError) {
 				Console.WriteLine ("There are semantic errors! Oh no!");
 				StringBuilder bob = new StringBuilder ();
@@ -565,12 +663,17 @@ namespace Compilers
 					bob.Append ((string)errors[i]);
 					i++;
 				}
+
+				// Build an error report
 				string errorString = bob.ToString ();
 				System.IO.File.WriteAllText (@".\errorReport.txt",errorString);
-			} else {
+			} 
+
+			// no errors, print into a .il file
+			else {
 				string code = prog.ToString ();
 				Console.Write (code);
-				string[] codeLines = code.Split ("\n".ToCharArray(), 10000);
+				string[] codeLines = code.Split ("\n".ToCharArray(), 1000000);
 				System.IO.File.WriteAllLines (@".\" + parse.fileName +".il",codeLines);
 			}
 		}

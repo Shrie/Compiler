@@ -1,4 +1,8 @@
-﻿using System;
+﻿// LabelMaker class generates label strings
+// for the parser to use. Ensures that every
+// label is different from the others.
+
+using System;
 
 namespace Compilers
 {
@@ -13,7 +17,8 @@ namespace Compilers
 		}
 
 		public string MakeLabel(){
-			string outLabel = string.Concat (label, labelNum.ToString());
+			string outLabel = string.Concat (label, 
+				labelNum.ToString());
 			labelNum++;
 			return outLabel;
 		}

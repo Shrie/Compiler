@@ -1,4 +1,10 @@
-﻿using System;
+﻿// The Scanner class handles the tokenization of
+// code passed as input.
+// It returns an ArrayList of tokens that will
+// be analyzed be the Parser
+
+
+using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -19,7 +25,8 @@ namespace Compilers
 
 		}
 			
-		//dispatcher method destroys whitespace and sends strings to the scanner
+		// dispatcher method destroys whitespace and 
+		// sends strings to the scanner
 
 		public static string Dispatcher (string x)
 		{
@@ -34,7 +41,8 @@ namespace Compilers
 				//loop while the next char is not end of file
 				while (win.Peek () != -1) {
 					//chomp whitespace until next non empty char
-					if (win.Peek() == 13 ||win.Peek() == 133 ||win.Peek() == -1) {
+					if (win.Peek() == 13 ||win.Peek() == 133 ||
+						win.Peek() == -1) {
 						column_counter = 0;
 						row_counter++;
 						int junk = win.Read ();
@@ -85,7 +93,8 @@ namespace Compilers
 							//reached the end of file before end of comment
 							//throw an error flag
 							else if (comp2 == -1) {
-								tokies.Add (new Token("MP_RUN_COMMENT",lexeme.ToString(),row_counter,column_counter));
+								tokies.Add (new Token("MP_RUN_COMMENT",
+									lexeme.ToString(),row_counter,column_counter));
 								eoc = true;
 								err_flag = true;
 								column_counter += add_count;
@@ -103,7 +112,8 @@ namespace Compilers
 
 						//if no errors found return comment token
 						if (!err_flag) {
-							tokies.Add (new Token("MP_COMMENT",lexeme.ToString(),row_counter,column_counter));
+							tokies.Add (new Token("MP_COMMENT",lexeme.ToString(),
+								row_counter,column_counter));
 							column_counter += add_count;
 							row_counter += row_add;
 						}
@@ -152,7 +162,8 @@ namespace Compilers
 							//check for new line char, if so, it's a run on string
 							//throw error flag
 							else if (comp2 == 13 || comp2 == 133 || comp2 == -1) {
-								tokies.Add (new Token("MP_STRING_RUN",lexeme.ToString(),
+								tokies.Add (new Token("MP_STRING_RUN",
+									lexeme.ToString(),
 									row_counter,column_counter));
 
 								eos = true;
@@ -173,7 +184,8 @@ namespace Compilers
 						//if the error flag isn't thrown add the
 						//token for string lit
 						if (!run_flag) {
-							tokies.Add (new Token("MP_STRING_LIT",lexeme.ToString(),row_counter,column_counter));
+							tokies.Add (new Token("MP_STRING_LIT",lexeme.ToString(),
+								row_counter,column_counter));
 							column_counter += add_count;
 						}
 					}
@@ -197,7 +209,8 @@ namespace Compilers
 							white_space = Char.IsWhiteSpace ((char)win.Peek ());
 
 							//check for error, string, or comment
-							if (win.Peek () == -1 || win.Peek() == 39 || win.Peek() == 123) {
+							if (win.Peek () == -1 || win.Peek() == 39 || 
+								win.Peek() == 123) {
 								white_space = true;
 							}
 						}
@@ -286,7 +299,8 @@ namespace Compilers
 
 					//check if first char is A-Z,a-z, or _
 					//if it is, it's an identifier
-					if ((comp >= 65 && comp <= 90) || (comp >= 97 && comp <= 122) || (comp == 95)) {
+					if ((comp >= 65 && comp <= 90) 
+						|| (comp >= 97 && comp <= 122) || (comp == 95)) {
 
 						//build the identifier lexeme
 						StringBuilder id_build = new StringBuilder ();
@@ -301,7 +315,8 @@ namespace Compilers
 							//see if the next char is also part of the identifier
 							//only valid identifier chars
 							int comp2 = check.Peek ();
-							if ((comp2 >= 65 && comp2 <= 90) || (comp2 >= 97 && comp2 <= 122) || 
+							if ((comp2 >= 65 && comp2 <= 90) ||
+								(comp2 >= 97 && comp2 <= 122) || 
 								(comp2 == 95) || (comp2 >= 48 && comp2 <= 57)) {
 
 								//consume the next char
@@ -321,15 +336,19 @@ namespace Compilers
 								//attempt reserved word lookup with id
 								try {
 									string stuff = reserved2 [lower_case];
-									tokies.Add (new Token(stuff,lower_case,row_counter,column_counter));
+									tokies.Add (new Token(stuff,lower_case,
+										row_counter,column_counter));
 									column_counter += add_count;
 								} 
 
-								//fails if not a reserved word, it's a normal identifier
+								// fails if not a reserved word, 
+								// it's a normal identifier
 								catch (KeyNotFoundException) {
 
-									//reached the end of the id, return id token and exit the loop
-									tokies.Add (new Token("MP_IDENTIFIER",lower_case.ToString(),
+									// reached the end of the id, 
+									// return id token and exit the loop
+									tokies.Add (new Token("MP_IDENTIFIER",
+										lower_case.ToString(),
 										row_counter,column_counter));
 									column_counter += add_count;
 									add_count = 0;
@@ -364,12 +383,15 @@ namespace Compilers
 								add_count++;
 							}
 
-							//if it's a decimal point it could be a fixed or float
+							// if it's a decimal point it 
+							// could be a fixed or float
 							else if (comp2 == 46) {
 
-								//it already contains a decimal, so it's an error
+								// it already contains a decimal, 
+								// so it's an error
 								if (is_fixed || is_float) {
-									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),
+									tokies.Add (new Token("MP_ERROR",
+										lexeme.ToString(),
 										row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
@@ -392,7 +414,8 @@ namespace Compilers
 
 								//not a digit, raise an error flag
 								else {
-									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),
+									tokies.Add (new Token("MP_ERROR",
+										lexeme.ToString(),
 										row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
@@ -406,7 +429,8 @@ namespace Compilers
 								//the number already contained an e or E
 								//it's an error
 								if (is_float) {
-									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
+									tokies.Add (new Token("MP_ERROR",
+										lexeme.ToString(),row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
 									add_count = 0;
@@ -433,7 +457,8 @@ namespace Compilers
 									} else {
 
 										//not a digit, return an error
-										tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
+										tokies.Add (new Token("MP_ERROR",
+											lexeme.ToString(),row_counter,column_counter));
 										is_num = false;
 										column_counter += add_count;
 										add_count = 0;
@@ -446,7 +471,8 @@ namespace Compilers
 								} else {
 
 									//no digit, no token for you
-									tokies.Add (new Token("MP_ERROR",lexeme.ToString(),row_counter,column_counter));
+									tokies.Add (new Token("MP_ERROR",
+										lexeme.ToString(),row_counter,column_counter));
 									is_num = false;
 									column_counter += add_count;
 									add_count = 0;
@@ -457,15 +483,18 @@ namespace Compilers
 								//number it is based on the flags
 
 								if (is_float) {
-									tokies.Add (new Token("MP_FLOAT_LIT",lexeme.ToString(),row_counter,column_counter));
+									tokies.Add (new Token("MP_FLOAT_LIT",
+										lexeme.ToString(),row_counter,column_counter));
 									column_counter += add_count;
 									add_count = 0;
 								} else if (is_fixed) {
-									tokies.Add (new Token("MP_FLOAT_LIT",lexeme.ToString(),row_counter,column_counter));
+									tokies.Add (new Token("MP_FLOAT_LIT",
+										lexeme.ToString(),row_counter,column_counter));
 									column_counter += add_count;
 									add_count = 0;
 								} else {
-									tokies.Add (new Token("MP_INTEGER_LIT",lexeme.ToString(),row_counter,column_counter));
+									tokies.Add (new Token("MP_INTEGER_LIT",
+										lexeme.ToString(),row_counter,column_counter));
 									column_counter += add_count;
 									add_count = 0;
 								}
@@ -560,7 +589,8 @@ namespace Compilers
 
 					//if the char doesn't match any token, it's an error
 					else {
-						tokies.Add (new Token("MP_ERROR",comp.ToString(),row_counter,column_counter));
+						tokies.Add (new Token("MP_ERROR",comp.ToString(),
+							row_counter,column_counter));
 						column_counter++;
 					}
 
