@@ -1,14 +1,27 @@
-﻿using System;
+﻿// The Parser class accepts an ArrayList of Tokens
+// as input and determines if the program is
+// Syntactically correct. As it parses, it passes
+// Semantic records to the Semantic Analyzer which
+// generates the machine code.
+
+
+using System;
 using System.Collections;
 using System.Text;
 using System.IO;
 
 namespace Compilers
 {
+
+	//second attempt at a working parser.
+	//the first one had issues.
+
 	public class Parser2
 	{
+		//instance variables
 		private bool hasError;
 		private ArrayList errors;
+
 		public string fileName;
 
 		private LabelMaker labelMe;
@@ -26,7 +39,6 @@ namespace Compilers
 		private string rKind;
 		private string rMode;
 		private int rSize;
-		//private int rOffset;
 		private Stack rLexStack;
 
 		private StringReader tokens;
@@ -40,8 +52,11 @@ namespace Compilers
 		private SemanticAnalyzer annie;
 		private bool assignFlag;
 
+		//Parser constructor
+
 		public Parser2 (string tokens_in, ArrayList tokes_in, string inFile)
 		{
+			//initialize variables
 			hasError = false;
 			errors = new ArrayList ();
 
@@ -63,7 +78,12 @@ namespace Compilers
 			fileName = fileName.Replace (".up","");
 		}
 
+		//look at the next token in the stream
+
 		public void Peek(){
+
+			// check if to make sure it's not
+			// the last token
 			if (tokePoint < tokes.Count) {
 				ct = ((Token)tokes[tokePoint]).GetName();
 				currentLexeme = ((Token)tokes[tokePoint]).GetLex();
@@ -77,11 +97,12 @@ namespace Compilers
 
 				tokePoint++;
 
+				//ignore comments
 				if(ct == "MP_COMMENT"){
 					Peek ();
 				}
 
-
+			// didn't find EOF
 			} else {
 				Console.WriteLine ("Out of tokens.");
 			}
@@ -92,28 +113,45 @@ namespace Compilers
 			Peek ();
 
 			//start with the SystemGoal rule 1
+			//check for the first token 'program'
 			if (ct == "MP_PROGRAM") {
 				Console.WriteLine ("Using rule 1");
+
+				//expand non-terminal <program>
 				Program ();
 			} else {
 				errorMessage ("keyword 'program'");
 			}
 
+			//check for token EOF
 			if (ct == "MP_EOF"){
+
+				//throw error messages
 				if (hasError) {
 					Console.WriteLine ("Parse failed!!! What have you done!?");
 					PrintErrors ();
-				} else {
+				} 
+
+				//parse successful, print code
+				else {
 					Console.WriteLine ("Program parsed successfully!");
 					annie.GenTearDown ();
 					annie.GenHalt ();
 					annie.PrintCode ();
 				}
-			} else if (hasError) {
+			} 
+
+			// not EOF, throw errors
+			else if (hasError) {
 				Console.WriteLine ("Parse failed!!! What have you done!?");
 				PrintErrors ();
 			}
 		}
+
+		// the following functions are based on
+		// non-terminals from the grammar.
+		// Expand the non-terminal based on the next
+		// symbol in the stream.
 
 		public void Program(){
 			if (ct == "MP_PROGRAM") {
@@ -161,7 +199,8 @@ namespace Compilers
 		}
 
 		public void Block(){
-			if (ct == "MP_BEGIN" || ct == "MP_FUNCTION" || ct == "MP_PROCEDURE" || ct == "MP_VAR") {
+			if (ct == "MP_BEGIN" || ct == "MP_FUNCTION" || 
+				ct == "MP_PROCEDURE" || ct == "MP_VAR") {
 				//rule 4
 				Console.WriteLine ("Using rule 4");
 				VariableDeclarationPart ();
@@ -245,8 +284,6 @@ namespace Compilers
 				while (rLexStack.Count != 0) {
 					rLex = (string)rLexStack.Pop ();
 					cRecord = new TableRecord (rLex, rType, rKind, rMode, rSize);
-					//cRecord.SetOffset (rOffset);
-					//rOffset++;
 					currentTable.AddRecord (cRecord);
 				}
 			} else {
@@ -255,6 +292,7 @@ namespace Compilers
 		}
 
 		public void Type(){
+			// set the variable type based on token
 			if (ct == "MP_INTEGER") {
 				//rule10
 				Console.WriteLine ("Using rule 10");
@@ -364,6 +402,8 @@ namespace Compilers
 				//rule19
 				Console.WriteLine ("Using rule 19");
 				Peek ();
+
+				//additional symbol table
 				string labelIt = labelMe.MakeLabel ();
 				nextTable = new SymbolTable (currentLexeme, depth, labelIt);
 				depth++;
@@ -378,6 +418,7 @@ namespace Compilers
 
 				OptionalFormalParameterList ();
 
+				//build a new table record
 				currentTable.AddRecord (pfRecord);
 				currentTable = nextTable;
 			} else {
@@ -395,6 +436,7 @@ namespace Compilers
 				nextTable = new SymbolTable (currentLexeme, depth, labelIt);
 				depth++;
 
+				//set table information
 				rKind = "function";
 				rSize = 0;
 				rLex = currentLexeme;
@@ -413,6 +455,7 @@ namespace Compilers
 
 				Type ();
 
+				//set new record
 				pfRecord.SetType (rType);
 				currentTable.AddRecord (pfRecord);
 				currentTable = nextTable;
@@ -491,12 +534,11 @@ namespace Compilers
 
 				Type ();
 
+				//build records into a table
 				Stack tStack = new Stack ();
 				while (rLexStack.Count != 0) {
 					rLex = (string)rLexStack.Pop ();
 					cRecord = new TableRecord (rLex, rType, rKind, rMode, rSize);
-					//cRecord.SetOffset (rOffset);
-					//rOffset++;
 					nextTable.AddRecord (cRecord);
 					Parameter pParam = new Parameter (rMode,rType);
 					tStack.Push (pParam);
@@ -528,6 +570,7 @@ namespace Compilers
 
 				Type ();
 
+				//build records for a symbol table
 				Stack tStack = new Stack ();
 				while (rLexStack.Count != 0) {
 					rLex = (string)rLexStack.Pop ();
@@ -575,8 +618,11 @@ namespace Compilers
 		}
 
 		public void StatementSequence(){
-			if (ct == "MP_BEGIN" || ct == "MP_END" || ct == "MP_IF" || ct == "MP_FOR" || ct == "MP_READ" || ct == "MP_REPEAT" || ct == "MP_UNTIL" ||
-			    ct == "MP_WHILE" || ct == "MP_WRITE" || ct == "MP_WRITELN" || ct == "MP_IDENTIFIER" || ct == "MP_SCOLON") {
+			if (ct == "MP_BEGIN" || ct == "MP_END" || ct == "MP_IF" || 
+				ct == "MP_FOR" || ct == "MP_READ" || ct == "MP_REPEAT" || 
+				ct == "MP_UNTIL" || ct == "MP_WHILE" || ct == "MP_WRITE" || 
+				ct == "MP_WRITELN" || ct == "MP_IDENTIFIER" || 
+				ct == "MP_SCOLON") {
 				//rule31
 				Console.WriteLine ("Using rule 31");
 				Statement ();
@@ -605,7 +651,8 @@ namespace Compilers
 		}
 
 		public void Statement(){
-			if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL" || ct == "MP_SCOLON") {
+			if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL" ||
+				ct == "MP_SCOLON") {
 				//rule34
 				Console.WriteLine ("Using rule 34");
 				EmptyStatement ();
@@ -648,7 +695,8 @@ namespace Compilers
 		}
 
 		public void EmptyStatement(){
-			if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL" || ct == "MP_SCOLON") {
+			if (ct == "MP_ELSE" || ct == "MP_END" || 
+				ct == "MP_UNTIL" || ct == "MP_SCOLON") {
 				//rule44 - lambda
 				Console.WriteLine ("Using rule 44");
 			} else {
@@ -703,7 +751,10 @@ namespace Compilers
 			if (ct == "MP_IDENTIFIER") {
 				//rule48
 				Console.WriteLine ("Using rule 48");
+
+				// generate read statement code
 				annie.GenRead (currentLexeme);
+
 				VariableIdentifier ();
 			} else {
 				errorMessage ("an identifier");
@@ -746,6 +797,8 @@ namespace Compilers
 
 				WriteParameterTail ();
 
+				// gen a new line in the
+				// machine code
 				annie.GenWriteLine ();
 
 				if (ct == "MP_RPAREN") {
@@ -776,8 +829,10 @@ namespace Compilers
 		}
 
 		public void WriteParameter(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" ||
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || 
+				ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule53
 				Console.WriteLine ("Using rule 53");
 				OrdinalExpression ();
@@ -799,8 +854,11 @@ namespace Compilers
 
 				BooleanExpression ();
 
+				// make else-end labels
 				string elseLabel = labelMe.MakeLabel ();
 				string endLabel = labelMe.MakeLabel ();
+
+				// branch to else code
 				annie.GenBranchConditional (elseLabel);
 
 				if (ct == "MP_THEN") {
@@ -810,10 +868,16 @@ namespace Compilers
 				}
 
 				Statement ();
+
+				// generate code to exit loop
 				annie.GenBranchUnconditional (endLabel);
+
+				// generate code for else label
 				annie.GenLabel (elseLabel);
 
 				OptionalElsePart ();
+
+				// generate end label
 				annie.GenLabel (endLabel);
 			} else {
 				errorMessage ("keyword 'if'");
@@ -827,7 +891,8 @@ namespace Compilers
 				Peek ();
 
 				Statement ();
-			} else if (ct == "MP_END" || ct == "MP_UNTIL" || ct == "MP_SCOLON") {
+			} else if (ct == "MP_END" || ct == "MP_UNTIL" ||
+				ct == "MP_SCOLON") {
 				//rule58 - lambda
 				Console.WriteLine ("Using rule 58");
 			} else {
@@ -840,8 +905,12 @@ namespace Compilers
 				//rule59
 				Console.WriteLine ("Using rule 59");
 				Peek ();
+
+				// make labels
 				string loopLabel = labelMe.MakeLabel ();
 				string endLabel = labelMe.MakeLabel ();
+
+				// generate loop label code
 				annie.GenLabel (loopLabel);
 
 				StatementSequence ();
@@ -853,7 +922,12 @@ namespace Compilers
 				}
 
 				BooleanExpression ();
+
+				// generate code to branch out if the
+				// boolean returns true
 				annie.GenBranchConditionalT (endLabel);
+
+				// generate end loop labels
 				annie.GenBranchUnconditional (loopLabel);
 				annie.GenLabel (endLabel);
 			} else {
@@ -866,11 +940,15 @@ namespace Compilers
 				//rule60
 				Console.WriteLine ("Using rule 60");
 				Peek ();
+
+				// make labels
 				string loopLabel = labelMe.MakeLabel ();
 				string endLabel = labelMe.MakeLabel ();
 				annie.GenLabel (loopLabel);
 
 				BooleanExpression ();
+
+				// gen code to check boolean and branch
 				annie.GenBranchConditional (endLabel);
 
 				if (ct == "MP_DO") {
@@ -881,6 +959,7 @@ namespace Compilers
 
 				Statement ();
 
+				// generate end loop labels
 				annie.GenBranchUnconditional (loopLabel);
 				annie.GenLabel (endLabel);
 			} else {
@@ -890,12 +969,15 @@ namespace Compilers
 
 		public void ForStatement(){
 			if (ct == "MP_FOR") {
-				//rule61
+				// rule61
 				Console.WriteLine ("Using rule 61");
 				Peek ();
+
+				// generate labels
 				string loopLabel = labelMe.MakeLabel ();
 				string endLabel = labelMe.MakeLabel ();
 
+				// set control lexeme
 				string controlLex = currentLexeme;
 				ControlVariable ();
 
@@ -906,8 +988,13 @@ namespace Compilers
 				}
 
 				InitialValue ();
+
+				// generate assign for the control lex
 				annie.GenAssign (controlLex);
 
+				// set the control variable so that other
+				// statements can't assign to it within
+				// the for loop
 				annie.SetControlVariable (controlLex);
 
 				string stepType = currentLexeme;
@@ -915,6 +1002,9 @@ namespace Compilers
 
 				FinalValue ();
 
+				// do some stuff to make sure the final
+				// value is consistent for every pass
+				// through the loop
 				annie.GenLabel (loopLabel);
 				annie.GenStackDup ();
 				annie.GenPushID (controlLex);
@@ -928,6 +1018,8 @@ namespace Compilers
 				}
 
 				Statement ();
+
+				// do some incrementing or decrementing
 				annie.ReleaseControlVariable ();
 				annie.GenPushID (controlLex);
 				annie.GenPushLit ("1","int");
@@ -938,6 +1030,8 @@ namespace Compilers
 				}
 				annie.GenArithmetic ();
 				annie.GenAssign (controlLex);
+
+				//generate loop end
 				annie.GenBranchUnconditional (loopLabel);
 				annie.GenLabel (endLabel);
 				annie.GenStackSub ();
@@ -957,8 +1051,10 @@ namespace Compilers
 		}
 
 		public void InitialValue(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" ||
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || 
+				ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule63
 				Console.WriteLine ("Using rule 63");
 				OrdinalExpression ();
@@ -982,8 +1078,10 @@ namespace Compilers
 		}
 
 		public void FinalValue(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" ||
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" ||
+				ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule66
 				Console.WriteLine ("Using rule 66");
 				OrdinalExpression ();
@@ -1011,10 +1109,14 @@ namespace Compilers
 				} else {
 					errorMessage ("')'");
 				}
-			} else if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL" || ct == "MP_EQUAL" || ct == "MP_LTHAN" ||
-				ct == "MP_GTHAN" || ct == "MP_LEQUAL" || ct == "MP_GEQUAL" || ct == "MP_NEQUAL" || ct == "MP_PLUS" || 
-				ct == "MP_TIMES" || ct == "MP_MINUS" || ct == "MP_DIVIDE" || ct == "MP_DIV" || ct == "MP_AND" ||
-				ct == "MP_OR" || ct == "MP_DO" || ct == "MP_COMMA" || ct == "MP_RPAREN" || ct == "MP_SCOLON" || ct == "MP_THEN") {
+			} else if (ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_UNTIL" ||
+				ct == "MP_EQUAL" || ct == "MP_LTHAN" || ct == "MP_GTHAN" || 
+				ct == "MP_LEQUAL" || ct == "MP_GEQUAL" || ct == "MP_NEQUAL" || 
+				ct == "MP_PLUS" || ct == "MP_TIMES" || ct == "MP_MINUS" || 
+				ct == "MP_DIVIDE" || ct == "MP_DIV" || ct == "MP_AND" ||
+				ct == "MP_OR" || ct == "MP_DO" || ct == "MP_COMMA" || 
+				ct == "MP_RPAREN" || ct == "MP_SCOLON" || ct == "MP_THEN" ||
+				ct == "MP_MOD" || ct == "MP_TO" || ct == "MP_DOWNTO") {
 				//rule69 - lambda
 				Console.WriteLine ("Using rule 69");
 			} else {
@@ -1040,8 +1142,10 @@ namespace Compilers
 		}
 
 		public void ActualParameter(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" ||
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || 
+				ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule72
 				Console.WriteLine ("Using rule 72");
 				OrdinalExpression ();
@@ -1051,8 +1155,10 @@ namespace Compilers
 		}
 
 		public void Expression(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || 
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || 
+				ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule73
 				Console.WriteLine ("Using rule 73");
 				SimpleExpression ();
@@ -1064,7 +1170,8 @@ namespace Compilers
 		}
 
 		public void OptionalRelationalPart(){
-			if (ct == "MP_EQUAL" || ct == "MP_GEQUAL" || ct == "MP_LEQUAL" || ct == "MP_GTHAN" || ct == "MP_LTHAN" ||
+			if (ct == "MP_EQUAL" || ct == "MP_GEQUAL" || ct == "MP_LEQUAL" ||
+				ct == "MP_GTHAN" || ct == "MP_LTHAN" ||
 			    ct == "MP_NEQUAL") {
 				//rule74
 				Console.WriteLine ("Using rule 74");
@@ -1072,9 +1179,13 @@ namespace Compilers
 				RelationalOperator ();
 
 				SimpleExpression ();
+
+				//generate an relational expression
 				annie.GenArithmetic ();
-			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_THEN" ||
-				ct == "MP_TO" || ct == "MP_UNTIL" || ct == "MP_SCOLON" || ct == "MP_COMMA" || ct == "MP_LPAREN" || ct == "MP_RPAREN") {
+			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" ||
+				ct == "MP_END" || ct == "MP_THEN" || ct == "MP_TO" ||
+				ct == "MP_UNTIL" || ct == "MP_SCOLON" || ct == "MP_COMMA" || 
+				ct == "MP_LPAREN" || ct == "MP_RPAREN") {
 				//rule75 - lambda
 				Console.WriteLine ("Using rule 75");
 			} else {
@@ -1113,8 +1224,10 @@ namespace Compilers
 		}
 
 		public void SimpleExpression(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || 
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || 
+				ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule82
 				Console.WriteLine ("Using rule 82");
 				OptionalSign ();
@@ -1135,11 +1248,16 @@ namespace Compilers
 				AddingOperator ();
 
 				Term ();
+
+				//generate an arithmetic expression, addition
 				annie.GenArithmetic ();
 
 				TermTail ();
-			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_THEN" || ct == "MP_TO" || ct == "MP_UNTIL" ||
-			           ct == "MP_COMMA" || ct == "MP_SCOLON" || ct == "MP_RPAREN" || ct == "MP_EQUAL" || ct == "MP_LTHAN" || ct == "MP_GTHAN" || ct == "MP_LEQUAL" ||
+			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" ||
+					   ct == "MP_END" || ct == "MP_THEN" || ct == "MP_TO" || 
+					   ct == "MP_UNTIL" || ct == "MP_COMMA" || ct == "MP_SCOLON" ||
+				       ct == "MP_RPAREN" || ct == "MP_EQUAL" || ct == "MP_LTHAN" || 
+					   ct == "MP_GTHAN" || ct == "MP_LEQUAL" ||
 			           ct == "MP_GEQUAL" || ct == "MP_NEQUAL") {
 				//rule84 - lambda
 				Console.WriteLine ("Using rule 84");
@@ -1157,9 +1275,13 @@ namespace Compilers
 				//rule86
 				Console.WriteLine ("Using rule 86");
 				Peek ();
+
+				//set next value to be negated
 				annie.SetNeg ();
-			} else if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			           ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN") {
+			} else if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" ||
+					   ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			           ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || 
+					   ct == "MP_LPAREN") {
 				//rule87 - lambda
 				Console.WriteLine ("Using rule 87");
 			} else {
@@ -1186,8 +1308,10 @@ namespace Compilers
 		}
 
 		public void Term(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" ||
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || 
+				ct == "MP_LPAREN") {
 				//rule91
 				Console.WriteLine ("Using rule 91");
 				Factor ();
@@ -1199,19 +1323,25 @@ namespace Compilers
 		}
 
 		public void FactorTail(){
-			if (ct == "MP_AND" || ct == "MP_DIV" || ct == "MP_MOD" || ct == "MP_TIMES" || ct == "MP_DIVIDE") {
+			if (ct == "MP_AND" || ct == "MP_DIV" || ct == "MP_MOD" ||
+				ct == "MP_TIMES" || ct == "MP_DIVIDE") {
 				//rule92
 				Console.WriteLine ("Using rule 92");
 				annie.PassOp (currentLexeme);
 				MultiplyingOperator ();
 
 				Factor ();
+
+				// generate arithmetic for multiplication
 				annie.GenArithmetic ();
 
 				FactorTail ();
-			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" || ct == "MP_END" || ct == "MP_OR" || ct == "MP_THEN" ||
-			           ct == "MP_TO" || ct == "MP_UNTIL" || ct == "MP_COMMA" || ct == "MP_SCOLON" || ct == "MP_RPAREN" || ct == "MP_EQUAL" ||
-			           ct == "MP_LTHAN" || ct == "MP_GTHAN" || ct == "MP_LEQUAL" || ct == "MP_GEQUAL" || ct == "MP_NEQUAL" ||
+			} else if (ct == "MP_DO" || ct == "MP_DOWNTO" || ct == "MP_ELSE" ||
+					   ct == "MP_END" || ct == "MP_OR" || ct == "MP_THEN" ||
+			           ct == "MP_TO" || ct == "MP_UNTIL" || ct == "MP_COMMA" ||
+					   ct == "MP_SCOLON" || ct == "MP_RPAREN" || ct == "MP_EQUAL" ||
+			           ct == "MP_LTHAN" || ct == "MP_GTHAN" || ct == "MP_LEQUAL" ||
+					   ct == "MP_GEQUAL" || ct == "MP_NEQUAL" ||
 			           ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule93 - lambda
 				Console.WriteLine ("Using rule 93");
@@ -1250,11 +1380,15 @@ namespace Compilers
 			if (ct == "MP_INTEGER_LIT") {
 				//rule99
 				Console.WriteLine ("Using rule 99");
+
+				// push an integer literal
 				annie.GenPushLit (currentLexeme, "int");
 				Peek ();
 			} else if (ct == "MP_FLOAT_LIT") {
 				//rule100
 				Console.WriteLine ("Using rule 100");
+
+				// push a float literal
 				annie.GenPushLit (currentLexeme, "float");
 				Peek ();
 			} else if (ct == "MP_STRING_LIT") {
@@ -1265,11 +1399,15 @@ namespace Compilers
 			} else if (ct == "MP_TRUE") {
 				//rule102
 				Console.WriteLine ("Using rule 102");
+
+				// push a boolean literal T
 				annie.GenPushLit ("1", "bool");
 				Peek ();
 			} else if (ct == "MP_FALSE") {
 				//rule103
 				Console.WriteLine ("Using rule 103");
+
+				// push a boolean literal F
 				annie.GenPushLit ("0", "bool");
 				Peek ();
 			} else if (ct == "MP_NOT") {
@@ -1278,6 +1416,8 @@ namespace Compilers
 				Peek ();
 
 				Factor ();
+
+				//perform not operation on bool
 				annie.GenNot ();
 			} else if (ct == "MP_LPAREN") {
 				//rule105
@@ -1294,6 +1434,10 @@ namespace Compilers
 			} else if (ct == "MP_IDENTIFIER") {
 				//rule116
 				Console.WriteLine ("Using rule 116");
+
+				// gen code for pushing an
+				// identifier
+
 				annie.GenPushID (currentLexeme);
 				VariableIdentifier ();
 
@@ -1344,8 +1488,10 @@ namespace Compilers
 		}
 
 		public void BooleanExpression(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" ||
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" ||
+				ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule111
 				Console.WriteLine ("Using rule 111");
 				Expression ();
@@ -1355,8 +1501,10 @@ namespace Compilers
 		}
 
 		public void OrdinalExpression(){
-			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" || ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
-			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" || ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
+			if (ct == "MP_FALSE" || ct == "MP_NOT" || ct == "MP_TRUE" ||
+				ct == "MP_IDENTIFIER" || ct == "MP_INTEGER_LIT" ||
+			    ct == "MP_FLOAT_LIT" || ct == "MP_STRING_LIT" ||
+				ct == "MP_LPAREN" || ct == "MP_PLUS" || ct == "MP_MINUS") {
 				//rule112
 				Console.WriteLine ("Using rule 112");
 				Expression ();
@@ -1407,6 +1555,9 @@ namespace Compilers
 				AssignProcedureTail ();
 
 				if (assignFlag) {
+
+					// generate assignment statement
+					// code
 					annie.GenAssign (target);
 					assignFlag = false;
 				}
@@ -1430,6 +1581,10 @@ namespace Compilers
 			}
 		}
 
+		// Function to build an error message
+		// extracted it to function to save over all
+		// code space
+
 		public void errorMessage(string expected){
 			//error check
 			StringBuilder errorOutput = new StringBuilder ();
@@ -1442,12 +1597,16 @@ namespace Compilers
 			errorOutput.Append (", got ");
 			errorOutput.Append (currentLexeme);
 			string newError = errorOutput.ToString ();
+
+			// Add new error to previous ones
 			errors.Add (newError);
 
 			hasError = true;
 
 			Peek ();
 		}
+
+		// Function to print all error messages
 
 		public void PrintErrors(){
 			for (int i = 0; i < errors.Count; i++){

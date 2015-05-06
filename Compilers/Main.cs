@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Main driver class for the Compiler project
+// This will handle the file read and instances
+// of the major classes Scanner and Parser
+
+using System;
 using System.IO;
 using System.Collections;
 
@@ -8,12 +12,6 @@ namespace Compilers
 	{
 		public static void Main (string[] args)
 		{
-			//test file paths
-			//@"c:\users\Hunter\Desktop\compilers\test1.txt"
-			//@"c:\users\Austo89\Desktop\compilers\test1.txt"
-			//@"/Users/David/Desktop/test1.txt"
-			//string contents = File.ReadAllText(@"c:\users\Austo89\Desktop\compilers\test1.txt");
-
 			//try to grab the file out of args[0]
 
 			try{

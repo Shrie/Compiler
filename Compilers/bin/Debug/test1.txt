@@ -1,8 +1,15 @@
 program Wonka;
 var dood, guy: integer;
+     man: float;
 {hope dis works}
 begin
+    man := 4.6;
     guy := 5;
     dood := 4;
-    write(guy + dood);
+    writeln(guy + dood);
+    for guy := 0 to dood do
+    begin
+        writeln(guy);
+    end;
+    man := guy;
 end.
