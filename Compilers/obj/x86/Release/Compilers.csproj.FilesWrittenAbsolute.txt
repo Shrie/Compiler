@@ -1,0 +1,5 @@
+/Users/David/Documents/Compilers/Compiler/Compilers/obj/x86/Release/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/Users/David/Documents/Compilers/Compiler/Compilers/bin/Release/Compilers.exe.mdb
+/Users/David/Documents/Compilers/Compiler/Compilers/bin/Release/Compilers.exe
+/Users/David/Documents/Compilers/Compiler/Compilers/obj/x86/Release/Compilers.exe
+/Users/David/Documents/Compilers/Compiler/Compilers/obj/x86/Release/Compilers.exe.mdb
